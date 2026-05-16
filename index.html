@@ -279,6 +279,8 @@
       <button data-page="feedback" onclick="switchPage('feedback',this)"><span class="icon">💬</span> Feedback</button>
       <button data-page="history" onclick="switchPage('history',this)"><span class="icon">📅</span> History</button>
       <button data-page="stats" onclick="switchPage('stats',this)"><span class="icon">📊</span> Insights</button>
+      <div class="nav-sep">Settings</div>
+      <button data-page="data" onclick="switchPage('data',this)"><span class="icon">💾</span> My Data</button>
     </nav>
   </aside>
 
@@ -515,6 +517,42 @@
     <div class="page" id="page-stats">
       <div class="page-header"><h1>Insights</h1><p>Patterns from your mood data.</p></div>
       <div id="stats-content"></div>
+    </div>
+
+    <!-- ══════════ DATA PAGE ══════════ -->
+    <div class="page" id="page-data">
+      <div class="page-header">
+        <h1>My Data</h1>
+        <p>Export your entries to back them up, or import from a previous device.</p>
+      </div>
+
+      <!-- Export -->
+      <div class="card">
+        <h2><span>📤</span> Export My Data</h2>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:16px;line-height:1.6">Downloads all your mood entries, reflections and feedback as a <strong style="color:var(--text)">JSON backup file</strong>. Use this to back up your data or move it to a new device/URL.</p>
+        <div id="export-summary" style="background:var(--surface2);border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:.85rem;color:var(--muted)"></div>
+        <button class="btn btn-primary" onclick="exportData()">⬇ Download Backup</button>
+      </div>
+
+      <!-- Import -->
+      <div class="card">
+        <h2><span>📥</span> Import / Restore Data</h2>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:16px;line-height:1.6">Select a backup file to restore your entries. <strong style="color:var(--accent2)">This will merge with your existing data</strong> — nothing will be overwritten.</p>
+        <label style="display:block;background:var(--surface2);border:2px dashed var(--border);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:border .15s" id="drop-zone">
+          <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)"/>
+          <div style="font-size:2rem;margin-bottom:8px">📂</div>
+          <div style="font-size:.9rem;color:var(--muted)">Tap to choose your backup file</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:4px">soulfull-backup-*.json</div>
+        </label>
+        <div id="import-result" style="margin-top:14px;font-size:.85rem;display:none"></div>
+      </div>
+
+      <!-- Danger zone -->
+      <div class="card" style="border-color:#f8717130">
+        <h2><span>⚠️</span> Clear All Data</h2>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:16px;line-height:1.6">Permanently deletes all entries, reflections and feedback from this device. <strong style="color:var(--red)">This cannot be undone.</strong> Export first!</p>
+        <button class="btn btn-danger" onclick="clearAllData()">🗑 Clear Everything</button>
+      </div>
     </div>
 
   </main>
@@ -1181,6 +1219,7 @@ function switchPage(page, btn) {
   if (page==='feedback') { renderFeedbackList(); }
   if (page==='history')  { renderHistory(); }
   if (page==='stats')    { renderStats(); }
+  if (page==='data')     { renderDataSummary(); }
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1313,6 +1352,97 @@ function renderStats() {
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+  }
+
+  // ── Data Export / Import ──────────────────────────────────────────────────
+  function renderDataSummary() {
+    const entries  = loadEntries();
+    const feedback = loadFeedback();
+    const journal  = loadJournal();
+    document.getElementById('export-summary').innerHTML =
+      `📝 <strong style="color:var(--text)">${entries.length}</strong> mood entries &nbsp;·&nbsp; ` +
+      `📓 <strong style="color:var(--text)">${journal.length}</strong> reflections &nbsp;·&nbsp; ` +
+      `💬 <strong style="color:var(--text)">${feedback.length}</strong> feedback entries`;
+  }
+
+  function exportData() {
+    const data = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      entries:  loadEntries(),
+      feedback: loadFeedback(),
+      journal:  loadJournal(),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const date = new Date().toISOString().slice(0,10);
+    a.href     = url;
+    a.download = `soulfull-backup-${date}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importData(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        let added = { entries: 0, feedback: 0, journal: 0 };
+
+        // Merge entries
+        if (Array.isArray(data.entries)) {
+          const existing = loadEntries();
+          const existingDates = new Set(existing.map(x => x.date));
+          const newEntries = data.entries.filter(x => !existingDates.has(x.date));
+          saveEntries([...newEntries, ...existing]);
+          added.entries = newEntries.length;
+        }
+        // Merge feedback
+        if (Array.isArray(data.feedback)) {
+          const existing = loadFeedback();
+          const existingIds = new Set(existing.map(x => x.id));
+          const newFb = data.feedback.filter(x => !existingIds.has(x.id));
+          saveFeedbackStore([...newFb, ...existing]);
+          added.feedback = newFb.length;
+        }
+        // Merge journal
+        if (Array.isArray(data.journal)) {
+          const existing = loadJournal();
+          const existingDates = new Set(existing.map(x => x.date));
+          const newJournal = data.journal.filter(x => !existingDates.has(x.date));
+          saveJournalStore([...newJournal, ...existing]);
+          added.journal = newJournal.length;
+        }
+
+        const result = document.getElementById('import-result');
+        result.style.display = 'block';
+        result.innerHTML = `<div style="background:#4ade8018;border:1px solid #4ade8040;border-radius:10px;padding:14px 16px;color:var(--green)">
+          ✅ <strong>Import successful!</strong><br>
+          Added ${added.entries} mood entries · ${added.journal} reflections · ${added.feedback} feedback entries.<br>
+          <span style="color:var(--muted);font-size:.8rem">Refresh the app to see your restored data.</span>
+        </div>`;
+        renderDataSummary();
+      } catch(err) {
+        const result = document.getElementById('import-result');
+        result.style.display = 'block';
+        result.innerHTML = `<div style="background:#f8717118;border:1px solid #f8717140;border-radius:10px;padding:14px 16px;color:var(--red)">
+          ❌ Could not read this file. Make sure it's a valid Soulfull backup JSON.
+        </div>`;
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function clearAllData() {
+    if (!confirm('Are you sure? This will permanently delete ALL your entries, reflections and feedback. Export first!')) return;
+    localStorage.removeItem(STORE_KEY);
+    localStorage.removeItem(FB_STORE_KEY);
+    localStorage.removeItem(JN_STORE_KEY);
+    alert('All data cleared.');
+    renderDataSummary();
   }
 </script>
 </body>
