@@ -1,0 +1,13 @@
+{
+  "name": "MoodWork",
+  "short_name": "MoodWork",
+  "description": "Daily work mood tracker, reflection diary & leadership growth",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f1117",
+  "theme_color": "#6c63ff",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

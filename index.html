@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MoodWork</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6c63ff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MoodWork">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <style>
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3250;
+      --accent: #6c63ff; --accent2: #ff6584; --text: #e8eaf0; --muted: #7a7f99;
+      --green: #4ade80; --yellow: #facc15; --orange: #fb923c; --red: #f87171; --blue: #60a5fa;
+      --teal: #2dd4bf;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── Layout ── */
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { width: 240px; min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+    .main { flex: 1; padding: 32px; max-width: 960px; overflow-x: hidden; }
+    .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); padding: 0 8px 20px; border-bottom: 1px solid var(--border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .logo span { font-size: 1.4rem; }
+    nav button { width: 100%; text-align: left; padding: 10px 12px; background: none; border: none; border-radius: 8px; color: var(--muted); cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; transition: all .15s; }
+    nav button.active, nav button:hover { background: var(--surface2); color: var(--text); }
+    nav button.active { color: var(--accent); font-weight: 600; }
+    nav .icon { font-size: 1.1rem; width: 22px; text-align: center; }
+    nav .nav-sep { font-size: 0.7rem; color: var(--muted); padding: 10px 12px 4px; text-transform: uppercase; letter-spacing: .06em; }
+
+    /* ── Pages ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── Page header ── */
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; }
+    .page-header p { color: var(--muted); margin-top: 4px; font-size: 0.9rem; }
+    .date-badge { display: inline-block; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; font-size: 0.8rem; color: var(--muted); margin-bottom: 8px; }
+
+    /* ── Cards ── */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 20px; }
+    .card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+    /* ── Trend Chart ── */
+    .trend-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; margin-bottom: 20px; }
+    .trend-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+    .trend-header h2 { font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .chart-legend { display: flex; gap: 16px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--muted); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .chart-wrap { position: relative; width: 100%; }
+    .chart-wrap svg { width: 100%; display: block; overflow: visible; }
+    .chart-no-data { text-align: center; padding: 40px 0; color: var(--muted); font-size: 0.85rem; }
+    .chart-tooltip { position: absolute; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 0.78rem; pointer-events: none; opacity: 0; transition: opacity .15s; white-space: nowrap; z-index: 10; }
+    .chart-tooltip.show { opacity: 1; }
+    .tt-date { color: var(--muted); margin-bottom: 4px; font-size: 0.72rem; }
+    .tt-row { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
+    .tt-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+    /* ── Mood selector ── */
+    .mood-grid { display: flex; gap: 12px; flex-wrap: wrap; }
+    .mood-btn { flex: 1; min-width: 80px; padding: 16px 8px; background: var(--surface2); border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: all .2s; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .mood-btn:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .mood-btn.selected { border-color: var(--accent); background: #6c63ff22; }
+    .mood-btn .emoji { font-size: 2rem; }
+    .mood-btn .label { font-size: 0.75rem; color: var(--muted); font-weight: 500; }
+    .mood-btn.selected .label { color: var(--accent); }
+    .mood-btn[data-mood="amazing"].selected { border-color: var(--green); background: #4ade8011; }
+    .mood-btn[data-mood="amazing"].selected .label { color: var(--green); }
+    .mood-btn[data-mood="good"].selected { border-color: var(--blue); background: #60a5fa11; }
+    .mood-btn[data-mood="good"].selected .label { color: var(--blue); }
+    .mood-btn[data-mood="okay"].selected { border-color: var(--yellow); background: #facc1511; }
+    .mood-btn[data-mood="okay"].selected .label { color: var(--yellow); }
+    .mood-btn[data-mood="low"].selected { border-color: var(--orange); background: #fb923c11; }
+    .mood-btn[data-mood="low"].selected .label { color: var(--orange); }
+    .mood-btn[data-mood="stressed"].selected { border-color: var(--red); background: #f8717111; }
+    .mood-btn[data-mood="stressed"].selected .label { color: var(--red); }
+
+    /* ── Emotion chips (journal) ── */
+    .emotion-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .emotion-chip { padding: 8px 16px; border-radius: 20px; font-size: 0.82rem; border: 1.5px solid var(--border); background: var(--surface2); cursor: pointer; transition: all .15s; user-select: none; display: flex; align-items: center; gap: 6px; }
+    .emotion-chip:hover { border-color: var(--accent2); }
+    .emotion-chip.selected { border-color: var(--accent2); background: #ff658422; color: var(--accent2); }
+
+    /* ── Sliders ── */
+    .slider-row { display: flex; align-items: center; gap: 12px; }
+    .slider-row label { font-size: 0.85rem; color: var(--muted); min-width: 60px; }
+    input[type=range] { flex: 1; -webkit-appearance: none; height: 6px; background: var(--surface2); border-radius: 3px; outline: none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; }
+    .slider-val { font-size: 0.85rem; font-weight: 600; color: var(--accent); min-width: 28px; text-align: right; }
+
+    /* ── Area / improvement chips ── */
+    .area-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .area-chip { padding: 7px 14px; border-radius: 20px; font-size: 0.8rem; border: 1.5px solid var(--border); background: var(--surface2); cursor: pointer; transition: all .15s; user-select: none; }
+    .area-chip:hover { border-color: var(--accent2); }
+    .area-chip.selected { border-color: var(--accent2); background: #ff658422; color: var(--accent2); }
+
+    /* ── Inputs ── */
+    textarea, select, input[type=text], input[type=date] { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; color: var(--text); font-family: inherit; font-size: 0.9rem; outline: none; transition: border .15s; }
+    textarea { resize: vertical; min-height: 90px; }
+    textarea:focus, select:focus, input:focus { border-color: var(--accent); }
+    textarea::placeholder, input::placeholder { color: var(--muted); }
+    select option { background: var(--surface2); }
+    input[type=date]::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+
+    /* ── Form layout ── */
+    .form-row { margin-bottom: 16px; }
+    .form-row label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+    .form-row .hint { font-size: 0.75rem; color: var(--muted); margin-top: 4px; font-style: italic; opacity: .75; }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    /* ── Buttons ── */
+    .btn { padding: 12px 28px; border-radius: 10px; border: none; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all .15s; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #8079ff; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: .4; cursor: default; transform: none; }
+    .btn-ghost { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--text); }
+    .btn-sm { padding: 7px 16px; font-size: 0.82rem; border-radius: 8px; }
+    .btn-danger { background: #f8717120; color: var(--red); border: 1px solid #f8717140; }
+    .btn-danger:hover { background: #f8717130; }
+    .form-actions { display: flex; gap: 12px; align-items: center; margin-top: 4px; }
+    .saved-msg { color: var(--green); font-size: 0.85rem; opacity: 0; transition: opacity .3s; }
+    .saved-msg.show { opacity: 1; }
+
+    /* ── Toggle (positive/constructive) ── */
+    .toggle-group { display: flex; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); width: fit-content; }
+    .toggle-btn { padding: 9px 20px; border: none; background: var(--surface2); color: var(--muted); cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all .15s; }
+    .toggle-btn.active-pos { background: #4ade8022; color: var(--green); }
+    .toggle-btn.active-con { background: #fb923c22; color: var(--orange); }
+
+    /* ── Tip / insight boxes ── */
+    .tip-box { background: linear-gradient(135deg, #6c63ff22, #ff658411); border: 1px solid var(--accent); border-radius: 12px; padding: 18px 20px; display: flex; gap: 14px; align-items: flex-start; }
+    .tip-icon { font-size: 1.6rem; flex-shrink: 0; }
+    .tip-body h3 { font-size: 0.9rem; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+    .tip-body p { font-size: 0.88rem; color: var(--text); line-height: 1.55; }
+
+    /* ── Perspective reframe box ── */
+    .reframe-box { background: linear-gradient(135deg, #2dd4bf18, #4ade8010); border: 1px solid var(--teal); border-radius: 14px; padding: 20px 22px; margin-bottom: 16px; }
+    .reframe-box .rb-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--teal); font-weight: 700; margin-bottom: 6px; }
+    .reframe-box .rb-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+    .reframe-box .rb-body { font-size: 0.88rem; color: var(--text); line-height: 1.65; opacity: .9; }
+
+    /* ── Leadership philosophy box ── */
+    .philosophy-box { background: linear-gradient(135deg, #6c63ff1a, #ff658410); border: 1px solid var(--accent); border-radius: 14px; padding: 22px 24px; margin-bottom: 20px; }
+    .phil-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+    .phil-name { font-size: 1.05rem; font-weight: 700; color: var(--accent); }
+    .phil-thinker { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+    .phil-badge { font-size: 0.72rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; color: var(--muted); white-space: nowrap; }
+    .phil-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+    .phil-section-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; margin-bottom: 6px; }
+    .phil-principle { font-size: 0.9rem; color: var(--text); line-height: 1.6; }
+    .phil-quote { font-size: 0.88rem; color: var(--muted); font-style: italic; line-height: 1.65; padding: 12px 16px; border-left: 3px solid var(--accent); background: var(--surface2); border-radius: 0 8px 8px 0; margin: 10px 0; }
+    .phil-apply { font-size: 0.88rem; color: var(--text); line-height: 1.65; opacity: .92; }
+    .phil-practice { margin-top: 14px; background: var(--surface2); border-radius: 10px; padding: 14px 16px; }
+    .phil-practice .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--accent2); font-weight: 700; margin-bottom: 6px; }
+    .phil-practice p { font-size: 0.85rem; color: var(--text); line-height: 1.6; }
+    .phil-nav { display: flex; gap: 8px; align-items: center; margin-top: 14px; }
+    .phil-nav-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); font-size: 0.78rem; cursor: pointer; transition: all .15s; }
+    .phil-nav-btn:hover { color: var(--text); border-color: var(--accent); }
+    .phil-nav-info { font-size: 0.75rem; color: var(--muted); }
+
+    /* ── Journal entry list ── */
+    .journal-entry { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
+    .je-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .je-date { font-size: 0.8rem; color: var(--muted); }
+    .je-emotions { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .je-emotion-tag { padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; background: #ff658422; border: 1px solid #ff658440; color: var(--accent2); }
+    .je-section { margin-bottom: 10px; }
+    .je-section-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+    .je-section-text { font-size: 0.85rem; color: var(--text); line-height: 1.55; }
+    .je-commitment { padding: 8px 14px; background: var(--surface2); border-left: 3px solid var(--teal); border-radius: 0 8px 8px 0; font-size: 0.82rem; color: var(--muted); line-height: 1.4; margin-top: 8px; }
+
+    /* ── Feedback entries ── */
+    .feedback-entry { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; position: relative; }
+    .fb-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .fb-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .fb-type-badge { padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+    .fb-type-positive { background: #4ade8022; color: var(--green); border: 1px solid #4ade8040; }
+    .fb-type-constructive { background: #fb923c22; color: var(--orange); border: 1px solid #fb923c40; }
+    .fb-from { font-size: 0.78rem; color: var(--muted); }
+    .fb-date { font-size: 0.75rem; color: var(--muted); }
+    .fb-category { font-size: 0.75rem; color: var(--muted); background: var(--surface2); padding: 2px 8px; border-radius: 8px; }
+    .fb-text { font-size: 0.9rem; color: var(--text); line-height: 1.6; margin-bottom: 8px; }
+    .fb-action { font-size: 0.82rem; color: var(--muted); padding: 8px 12px; background: var(--surface2); border-left: 3px solid var(--accent2); border-radius: 0 8px 8px 0; line-height: 1.4; }
+    .fb-delete { position: absolute; top: 14px; right: 14px; opacity: 0; transition: opacity .15s; }
+    .feedback-entry:hover .fb-delete { opacity: 1; }
+
+    /* ── History ── */
+    .history-entry { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
+    .entry-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .entry-date { font-size: 0.8rem; color: var(--muted); }
+    .entry-mood { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600; }
+    .entry-mood .emoji { font-size: 1.3rem; }
+    .entry-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+    .mini-chip { padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
+    .entry-notes { font-size: 0.85rem; color: var(--muted); line-height: 1.5; margin-top: 8px; }
+    .entry-tip { margin-top: 10px; padding: 10px 14px; background: var(--surface2); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; font-size: 0.82rem; color: var(--muted); font-style: italic; line-height: 1.4; }
+    .energy-bar-row { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+    .energy-bar-bg { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+    .energy-bar-fill { height: 100%; border-radius: 3px; transition: width .5s; }
+
+    /* ── Stats ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 16px; margin-bottom: 20px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+    .stat-card .big { font-size: 2.2rem; font-weight: 700; }
+    .stat-card .lbl { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+    .mood-bar-row { display: flex; align-items: center; gap: 10px; margin: 6px 0; font-size: 0.82rem; }
+    .mood-bar-label { width: 70px; color: var(--muted); }
+    .mood-bar-bg { flex: 1; height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+    .mood-bar-fill { height: 100%; border-radius: 4px; }
+    .mood-bar-count { width: 24px; text-align: right; color: var(--muted); }
+
+    /* ── Empty state ── */
+    .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+    .empty .big-icon { font-size: 3rem; margin-bottom: 12px; }
+    .empty p { font-size: 0.9rem; }
+
+    /* ── Misc ── */
+    .section-divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+    .deep-link { font-size: 0.82rem; color: var(--accent2); text-decoration: none; cursor: pointer; background: none; border: none; padding: 0; }
+    .deep-link:hover { text-decoration: underline; }
+    .already-logged { background: #4ade8010; border: 1px solid #4ade8030; border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; color: var(--green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    @media (max-width: 640px) {
+      .app { flex-direction: column; }
+      .sidebar { width: 100%; min-height: auto; height: auto; position: static; padding: 12px; }
+      .logo { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+      nav { display: flex; flex-wrap: wrap; gap: 4px; }
+      nav button { width: auto; flex: 0 0 auto; }
+      nav .nav-sep { display: none; }
+      .main { padding: 16px; }
+      .form-grid-2 { grid-template-columns: 1fr; }
+      .chart-legend { gap: 8px; }
+      .phil-header { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="logo"><span>🧠</span> MoodWork</div>
+    <nav>
+      <div class="nav-sep">Daily</div>
+      <button class="active" data-page="log" onclick="switchPage('log',this)"><span class="icon">📝</span> Log Today</button>
+      <button data-page="journal" onclick="switchPage('journal',this)"><span class="icon">📓</span> Reflect</button>
+      <div class="nav-sep">Track</div>
+      <button data-page="feedback" onclick="switchPage('feedback',this)"><span class="icon">💬</span> Feedback</button>
+      <button data-page="history" onclick="switchPage('history',this)"><span class="icon">📅</span> History</button>
+      <button data-page="stats" onclick="switchPage('stats',this)"><span class="icon">📊</span> Insights</button>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <!-- ══════════ LOG PAGE ══════════ -->
+    <div class="page active" id="page-log">
+      <div class="trend-card">
+        <div class="trend-header">
+          <h2><span>📈</span> Your Trend (last 14 days)</h2>
+          <div class="chart-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div> Mood</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#6c63ff"></div> Energy</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ff6584"></div> Focus</div>
+          </div>
+        </div>
+        <div class="chart-wrap" id="chart-wrap">
+          <div class="chart-tooltip" id="chart-tooltip">
+            <div class="tt-date" id="tt-date"></div>
+            <div class="tt-row"><div class="tt-dot" style="background:#4ade80"></div><span id="tt-mood"></span></div>
+            <div class="tt-row"><div class="tt-dot" style="background:#6c63ff"></div><span id="tt-energy"></span></div>
+            <div class="tt-row"><div class="tt-dot" style="background:#ff6584"></div><span id="tt-focus"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-header">
+        <div class="date-badge" id="today-date"></div>
+        <h1>How's your work day going?</h1>
+        <p>Take 2 minutes to check in with yourself. Feeling something deeper? <button class="deep-link" onclick="switchPage('journal', document.querySelector('[data-page=journal]'))">Open your Reflect diary →</button></p>
+      </div>
+
+      <div class="card">
+        <h2><span>😊</span> Overall Mood</h2>
+        <div class="mood-grid">
+          <div class="mood-btn" data-mood="amazing" onclick="selectMood('amazing')"><span class="emoji">🤩</span><span class="label">Amazing</span></div>
+          <div class="mood-btn" data-mood="good"    onclick="selectMood('good')"   ><span class="emoji">😄</span><span class="label">Good</span></div>
+          <div class="mood-btn" data-mood="okay"    onclick="selectMood('okay')"   ><span class="emoji">😐</span><span class="label">Okay</span></div>
+          <div class="mood-btn" data-mood="low"     onclick="selectMood('low')"    ><span class="emoji">😔</span><span class="label">Low</span></div>
+          <div class="mood-btn" data-mood="stressed" onclick="selectMood('stressed')"><span class="emoji">😤</span><span class="label">Stressed</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span>⚡</span> Energy &amp; Focus</h2>
+        <div class="slider-row">
+          <label>Drained</label>
+          <input type="range" id="energy-slider" min="1" max="10" value="5" oninput="document.getElementById('energy-val').textContent=this.value"/>
+          <span class="slider-val" id="energy-val">5</span>
+          <label style="min-width:auto">Energised</label>
+        </div>
+        <div class="slider-row" style="margin-top:14px">
+          <label>Scattered</label>
+          <input type="range" id="focus-slider" min="1" max="10" value="5" oninput="document.getElementById('focus-val').textContent=this.value"/>
+          <span class="slider-val" id="focus-val">5</span>
+          <label style="min-width:auto">Laser</label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span>🎯</span> Areas to Improve Today</h2>
+        <div class="area-grid" id="area-grid"></div>
+      </div>
+
+      <div class="card">
+        <h2><span>✍️</span> Quick Reflection</h2>
+        <textarea id="notes-input" placeholder="What's on your mind? What went well? What felt hard?"></textarea>
+      </div>
+
+      <div class="tip-box" id="tip-box" style="margin-bottom:20px;display:none">
+        <div class="tip-icon" id="tip-icon">💡</div>
+        <div class="tip-body"><h3 id="tip-title">Tip</h3><p id="tip-text"></p></div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" id="save-btn" onclick="saveEntry()" disabled>Save Today's Entry</button>
+        <span class="saved-msg" id="saved-msg">✓ Saved!</span>
+      </div>
+    </div>
+
+    <!-- ══════════ JOURNAL / REFLECT PAGE ══════════ -->
+    <div class="page" id="page-journal">
+      <div class="page-header">
+        <div class="date-badge" id="journal-date"></div>
+        <h1>Reflect &amp; Gain Perspective</h1>
+        <p>A private space to process what's weighing on you — and grow through it as a leader.</p>
+      </div>
+
+      <div id="journal-already-logged" style="display:none" class="already-logged">
+        ✓ You've reflected today. Scroll down to see your entry &amp; leadership guidance, or update below.
+      </div>
+
+      <!-- Step 1: Emotions -->
+      <div class="card">
+        <h2><span>🫀</span> What are you feeling right now?</h2>
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:14px">Select all that apply. Naming emotions is the first step to understanding them.</p>
+        <div class="emotion-grid" id="emotion-grid"></div>
+      </div>
+
+      <!-- Step 2-5: Guided prompts -->
+      <div class="card">
+        <h2><span>🔍</span> Guided Reflection</h2>
+
+        <div class="form-row">
+          <label>1 · What happened? <span style="font-weight:400;opacity:.7">(describe it as a neutral reporter would — just the facts)</span></label>
+          <textarea id="j-situation" placeholder="E.g. My manager gave critical feedback on my presentation in front of the team. A project I led was put on hold. A colleague took credit for my work..." style="min-height:100px"></textarea>
+        </div>
+
+        <div class="form-row">
+          <label>2 · What story are you telling yourself about it?</label>
+          <textarea id="j-story" placeholder="E.g. I'm not good enough. Nobody respects my work. I always mess up under pressure. They don't value me..." style="min-height:90px"></textarea>
+          <div class="hint">This is where we often catastrophise or personalise. Write it honestly — awareness is the first step out.</div>
+        </div>
+
+        <div class="form-row">
+          <label>3 · What would a wise mentor or neutral observer say you're missing?</label>
+          <textarea id="j-lens" placeholder="E.g. Maybe my manager is under pressure too. Perhaps this is about the work, not my worth. There's context I don't have yet..." style="min-height:90px"></textarea>
+        </div>
+
+        <div class="form-row">
+          <label>4 · What's one thing within your control here?</label>
+          <textarea id="j-control" placeholder="E.g. How I respond. The conversation I can choose to have. The way I prepare next time. My own standards..." style="min-height:80px"></textarea>
+        </div>
+
+        <div class="form-row" style="margin-bottom:0">
+          <label>5 · What is one commitment you'll make in the next 24 hours?</label>
+          <textarea id="j-commitment" placeholder="E.g. I'll request a 1:1 with my manager to understand their perspective. I'll spend 30 minutes preparing better. I'll have a direct conversation..." style="min-height:80px"></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions" style="margin-bottom:28px">
+        <button class="btn btn-primary" onclick="saveJournal()">Save Reflection</button>
+        <span class="saved-msg" id="j-saved-msg">✓ Reflection saved!</span>
+      </div>
+
+      <!-- Perspective reframe (shown after save) -->
+      <div id="journal-insights" style="display:none">
+        <div class="reframe-box" id="reframe-box">
+          <div class="rb-label">Perspective Shift</div>
+          <div class="rb-title" id="rb-title"></div>
+          <div class="rb-body" id="rb-body"></div>
+        </div>
+
+        <!-- Leadership philosophy -->
+        <div class="philosophy-box" id="phil-box">
+          <div class="phil-header">
+            <div>
+              <div class="phil-name" id="phil-name"></div>
+              <div class="phil-thinker" id="phil-thinker"></div>
+            </div>
+            <div class="phil-badge" id="phil-badge">Leadership Lens 🧭</div>
+          </div>
+          <hr class="phil-divider"/>
+          <div class="phil-section-label">Core Principle</div>
+          <div class="phil-principle" id="phil-principle"></div>
+          <div class="phil-quote" id="phil-quote"></div>
+          <hr class="phil-divider"/>
+          <div class="phil-section-label">How This Speaks To Your Situation</div>
+          <div class="phil-apply" id="phil-apply"></div>
+          <div class="phil-practice">
+            <div class="label">Try This</div>
+            <p id="phil-practice"></p>
+          </div>
+          <div class="phil-nav">
+            <button class="phil-nav-btn" onclick="cyclePhilosophy(-1)">← Previous</button>
+            <button class="phil-nav-btn" onclick="cyclePhilosophy(1)">Next →</button>
+            <span class="phil-nav-info" id="phil-nav-info"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Past journal entries -->
+      <hr class="section-divider"/>
+      <h2 style="font-size:1rem;font-weight:600;margin-bottom:16px;color:var(--muted)">Past Reflections</h2>
+      <div id="journal-list"></div>
+    </div>
+
+    <!-- ══════════ FEEDBACK PAGE ══════════ -->
+    <div class="page" id="page-feedback">
+      <div class="page-header">
+        <h1>Feedback Received</h1>
+        <p>Log feedback from your manager, peers, or clients. Reflect and note your action plan.</p>
+      </div>
+
+      <div class="card">
+        <h2><span>➕</span> Log New Feedback</h2>
+        <div class="form-row">
+          <label>Type of feedback</label>
+          <div class="toggle-group">
+            <button class="toggle-btn active-pos" id="fb-type-pos" onclick="setFbType('positive')">👍 Positive</button>
+            <button class="toggle-btn" id="fb-type-con" onclick="setFbType('constructive')">🔧 Constructive</button>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-row">
+            <label>From</label>
+            <select id="fb-from"><option value="Manager">Manager / Leader</option><option value="Peer">Peer / Colleague</option><option value="Client">Client / Stakeholder</option><option value="Self">Self-reflection</option><option value="Other">Other</option></select>
+          </div>
+          <div class="form-row">
+            <label>Category</label>
+            <select id="fb-category"><option>Performance</option><option>Communication</option><option>Collaboration</option><option>Technical Skills</option><option>Leadership</option><option>Behaviour</option><option>Other</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Date received</label>
+          <input type="date" id="fb-date" style="max-width:200px"/>
+        </div>
+        <div class="form-row">
+          <label>What was the feedback?</label>
+          <textarea id="fb-text" placeholder="Write the feedback here, as close to verbatim as you can remember…" style="min-height:110px"></textarea>
+        </div>
+        <div class="form-row">
+          <label>Your action / response plan <span style="font-weight:400;opacity:.7">(optional)</span></label>
+          <textarea id="fb-action" placeholder="What will you do differently? How will you follow up?" style="min-height:80px"></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="saveFeedback()">Save Feedback</button>
+          <span class="saved-msg" id="fb-saved-msg">✓ Feedback saved!</span>
+        </div>
+      </div>
+
+      <hr class="section-divider"/>
+      <h2 style="font-size:1rem;font-weight:600;margin-bottom:16px;color:var(--muted)">Past Feedback</h2>
+      <div id="feedback-list"></div>
+    </div>
+
+    <!-- ══════════ HISTORY PAGE ══════════ -->
+    <div class="page" id="page-history">
+      <div class="page-header"><h1>Your History</h1><p>All your past mood check-ins.</p></div>
+      <div id="history-list"></div>
+    </div>
+
+    <!-- ══════════ STATS PAGE ══════════ -->
+    <div class="page" id="page-stats">
+      <div class="page-header"><h1>Insights</h1><p>Patterns from your mood data.</p></div>
+      <div id="stats-content"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  DATA
+// ════════════════════════════════════════════════════════════
+const STORE_KEY    = 'moodwork_entries';
+const FB_STORE_KEY = 'moodwork_feedback';
+const JN_STORE_KEY = 'moodwork_journal';
+
+const AREAS = ['Communication','Time Management','Focus','Collaboration','Prioritisation','Boundaries','Creativity','Confidence','Energy Management','Deep Work','Taking Breaks','Mindset','Problem Solving','Delegation','Learning'];
+
+const EMOTIONS = [
+  { id:'frustrated',    emoji:'😤', label:'Frustrated'    },
+  { id:'anxious',       emoji:'😰', label:'Anxious'       },
+  { id:'overwhelmed',   emoji:'🌊', label:'Overwhelmed'   },
+  { id:'disappointed',  emoji:'😞', label:'Disappointed'  },
+  { id:'resentful',     emoji:'😒', label:'Resentful'     },
+  { id:'demotivated',   emoji:'💤', label:'Demotivated'   },
+  { id:'conflicted',    emoji:'🤔', label:'Conflicted'    },
+  { id:'unappreciated', emoji:'🙈', label:'Unappreciated' },
+  { id:'self-doubting', emoji:'🫣', label:'Self-doubting' },
+  { id:'burned-out',    emoji:'🔥', label:'Burned Out'    },
+  { id:'irritated',     emoji:'😠', label:'Irritated'     },
+  { id:'ignored',       emoji:'👻', label:'Ignored'       },
+];
+
+const MOOD_META = {
+  amazing: { emoji:'🤩', label:'Amazing', color:'#4ade80', score:10 },
+  good:    { emoji:'😄', label:'Good',    color:'#60a5fa', score:8  },
+  okay:    { emoji:'😐', label:'Okay',    color:'#facc15', score:6  },
+  low:     { emoji:'😔', label:'Low',     color:'#fb923c', score:4  },
+  stressed:{ emoji:'😤', label:'Stressed',color:'#f87171', score:2  },
+};
+
+// ── Perspective reframes per emotion ──────────────────────────────────────────
+const REFRAMES = {
+  frustrated:    { title:'Frustration Is a Signal, Not a Verdict', body:'Frustration shows up when something you care about is being blocked. Ask: what value of mine is being challenged right now? That answer often points directly to what you need to address — with a conversation, a boundary, or a changed expectation. It is not a sign that you are failing.' },
+  anxious:       { title:'Anxiety Means You Care — Now Direct That Energy', body:'Anxiety lives in the gap between what is happening and what you fear might happen. It signals that something matters to you. The question is not "how do I stop feeling anxious?" but "what is the smallest useful action I can take right now?" Action almost always quiets anxious thoughts faster than thinking does.' },
+  overwhelmed:   { title:'Overwhelm Is a Systems Problem, Not a Character Flaw', body:'When you are overwhelmed, it means your capacity has been exceeded — not that you are weak. This is a design problem: too many inputs, not enough prioritisation, or unclear boundaries. Overwhelm deserves a redesign of your commitments, not self-criticism.' },
+  disappointed:  { title:'Disappointment Lives Where Unspoken Expectations Did', body:'Disappointment is the gap between what you expected and what happened. Before judging the outcome, consider: was your expectation clearly communicated? Could you have influenced the conditions? Disappointment often contains hidden data about what matters to you and where you can lead differently next time.' },
+  resentful:     { title:'Resentment Is the Price of Unset Boundaries', body:'Resentment builds slowly, then arrives all at once. It is almost always a sign that a boundary needed to be set earlier — and wasn\'t. The other person usually cannot see the resentment building. The real question is: what needs to be said directly, with care, that hasn\'t been said yet?' },
+  demotivated:   { title:'Motivation Follows Meaning — Find the Thread', body:'Motivation is not a switch you can flip. It is a byproduct of feeling that your work matters, that you are growing, and that what you do connects to something larger. When it disappears, it is usually a sign that one of those three connections has broken. Which one is missing right now?' },
+  conflicted:    { title:'Inner Conflict Means Two Values Are In Tension', body:'When you feel torn, it is rarely because you don\'t know what to do. It\'s because two things you value are pulling in opposite directions. Name both values clearly. Then ask: which of these aligns more closely with the leader I am working to become? That question usually points the way.' },
+  unappreciated: { title:'External Validation Is a Fragile Foundation', body:'Feeling unappreciated is painful and real. But it also invites an important question: are you measuring your work by others\' responses, or by your own standards? The most durable form of confidence comes from knowing you did the right thing regardless of whether it was noticed. That doesn\'t mean you shouldn\'t ask for recognition — you can, directly and clearly.' },
+  'self-doubting':{ title:'Self-Doubt Is the Shadow That Walks Beside Growth', body:'You only doubt yourself when you\'re attempting something that matters. Doubt means you are operating at the edge of your current comfort zone — which is exactly where growth happens. The goal is not to eliminate doubt, but to act meaningfully alongside it. Every leader you admire has felt this.' },
+  'burned-out':  { title:'Burnout Is Your Body\'s Veto — Listen To It', body:'Burnout is not a productivity problem. It is the result of sustained withdrawals from your reserves with insufficient recovery. It requires redesign — of your schedule, your commitments, your recovery practices — not more effort or willpower. The most sustainable leaders protect their energy like a strategic resource, because it is.' },
+  irritated:     { title:'Irritation Is a Surface Signal — What\'s Underneath It?', body:'Irritation is rarely about the thing that triggered it. It is usually accumulated stress, unmet needs, or a pattern that has finally crossed a threshold. Before reacting to the trigger, look for the root: what has been building? What need is not being met? That\'s where the real conversation or adjustment is needed.' },
+  ignored:       { title:'Feeling Ignored Often Means Your Voice Hasn\'t Found Its Format', body:'When your ideas or contributions seem invisible, it is worth asking: am I communicating in a way that makes it easy for others to hear me? Different leaders and environments respond to different styles — written vs verbal, direct vs consultative, data-led vs narrative. This is not about changing who you are; it\'s about translating yourself for your audience.' },
+};
+
+// ── Leadership philosophies ───────────────────────────────────────────────────
+const PHILOSOPHIES = {
+  stoicism: {
+    name: 'Stoic Leadership',
+    thinker: 'Marcus Aurelius · Epictetus · Seneca',
+    badge: 'Ancient Wisdom',
+    principle: 'Distinguish what is within your control from what is not. Invest all your energy in the former; meet everything else with equanimity.',
+    quote: '"You have power over your mind, not outside events. Realise this, and you will find strength." — Marcus Aurelius, Meditations',
+    apply: {
+      frustrated:  'The Stoics would say: your frustration is not caused by what happened — it is caused by your judgement about what happened. Where can you redirect your energy toward what you can actually change?',
+      anxious:     'Epictetus taught that anxiety comes from wanting to control the uncontrollable. Write down what you are anxious about. Then separate it: what is truly in your hands? Focus there alone.',
+      overwhelmed: 'Marcus Aurelius governed an empire one decision at a time. He did not think about everything at once — he thought about what was in front of him. What is the single next action that is within your control?',
+      default:     'The Stoic question for your situation: what part of this is within your control, and what is not? Release the latter — not with indifference, but with wisdom. Pour your energy into the former.',
+    },
+    practice: 'Tonight, write two columns: "Within my control" and "Outside my control." For everything in the second column, write one word: RELEASE. For the first column, write one concrete next action.',
+  },
+  'growth-mindset': {
+    name: 'Growth Mindset Leadership',
+    thinker: 'Carol Dweck · Stanford University',
+    badge: 'Psychology of Performance',
+    principle: 'Abilities are developed through effort, strategy, and learning from setbacks — not fixed at birth. The way you interpret challenges determines your trajectory.',
+    quote: '"In a growth mindset, challenges are exciting rather than threatening — so rather than thinking, oh, I\'m going to reveal my weaknesses, you say, wow, here\'s a chance to grow." — Carol Dweck',
+    apply: {
+      'self-doubting': 'Self-doubt is a fixed-mindset response — it assumes you are being measured and found lacking. A growth lens asks instead: what can I learn from this? What will I do differently? The process matters more than the outcome.',
+      disappointed:   'A growth mindset reframes disappointment as data. What did this situation teach you about your approach, your preparation, or your communication? That insight has value if you use it.',
+      demotivated:    'Demotivation in a growth mindset signals that you\'ve lost sight of the learning. Ask: what skill or understanding could you build in this role that you couldn\'t elsewhere? The answer often reignites engagement.',
+      default:        'The growth mindset leader asks "what can I learn?" before "what went wrong?" Your situation right now is not a verdict — it is an invitation to grow. What is the lesson inside it?',
+    },
+    practice: 'Write one thing you "failed" at recently. Then write three things you learned from it and one thing you will do differently. End with: "This made me better at ___."',
+  },
+  'emotional-intelligence': {
+    name: 'Emotional Intelligence',
+    thinker: 'Daniel Goleman · Richard Boyatzis',
+    badge: 'Leadership Psychology',
+    principle: 'The most effective leaders manage themselves before they manage others — through self-awareness, emotional regulation, empathy, and relational skill.',
+    quote: '"What really matters for success, character, happiness and life-long achievements is a definite set of emotional skills — your EQ — not just purely cognitive abilities." — Daniel Goleman',
+    apply: {
+      irritated:    'High EQ leaders use irritation as a diagnostic: what is this telling me about my unmet needs or crossed boundaries? They then choose their response deliberately rather than reacting. What would a deliberate response look like here?',
+      resentful:    'Resentment is an EQ alert: something has gone unexpressed for too long. EQ-driven leaders surface these feelings through honest, caring conversation before they calcify. Who do you need to talk to, and what do you need to say?',
+      conflicted:   'Emotional intelligence says: feel the conflict fully, then decide with both your head and heart. Which response here reflects your values and your care for the people involved?',
+      default:      'Start with self-awareness: name exactly what you are feeling and what triggered it. Then ask: if I respond from this emotion, what happens? If I respond from my values, what happens? High EQ is choosing the second.',
+    },
+    practice: 'For the next 3 days, when you notice a strong emotion at work, pause and write: the emotion, the trigger, what it is protecting, and the response you wish to give — before responding.',
+  },
+  'extreme-ownership': {
+    name: 'Extreme Ownership',
+    thinker: 'Jocko Willink · Leif Babin',
+    badge: 'Leadership Accountability',
+    principle: 'The leader is responsible for everything in their world — including their team\'s failures, their own reactions, and the outcomes they produce. There are no excuses, only solutions.',
+    quote: '"The most fundamental and important truth at the heart of Extreme Ownership: there are no bad teams, only bad leaders." — Jocko Willink',
+    apply: {
+      frustrated:  'Extreme Ownership asks: how did I contribute to this situation? Not to assign blame inward, but to find the leverage point. If you own it, you can change it. If it\'s someone else\'s fault, you\'re powerless.',
+      resentful:   'If you are resentful, ownership asks: why did I allow this to continue without addressing it? The answer is your path forward — not blame, but your next move.',
+      ignored:     'Extreme Ownership would say: if I\'m being ignored, that\'s on me to solve. How can I communicate differently? How can I make my message impossible to overlook? Own the outcome, own the solution.',
+      default:     'Ask the Extreme Ownership question: what is my role in this situation? Not to punish yourself — but to find the lever. If you own even 10% of it, that 10% is yours to change.',
+    },
+    practice: 'Write down the situation you\'re facing. Now write: "My role in this was ___." Then: "The one action I will take to change the outcome is ___." Own the problem to own the solution.',
+  },
+  'servant-leadership': {
+    name: 'Servant Leadership',
+    thinker: 'Robert Greenleaf · Ken Blanchard',
+    badge: 'Leadership Philosophy',
+    principle: 'The leader\'s primary role is to serve the growth and wellbeing of those they lead. Power is used in service of others — not the other way around.',
+    quote: '"The servant-leader is servant first. It begins with the natural feeling that one wants to serve, to serve first." — Robert Greenleaf',
+    apply: {
+      unappreciated: 'Servant leaders find meaning not in being appreciated but in the growth they enable in others. Ask: who am I serving right now, and am I doing it well? The answer is often more nourishing than any recognition.',
+      overwhelmed:   'A servant leader learns to protect their own capacity — because you cannot pour from an empty vessel. Asking for support is not weakness; it is modelling the vulnerability that builds psychological safety in teams.',
+      demotivated:   'Connect back to your purpose: who does your work serve? What impact does it have on real people? Servant leadership rekindles motivation by anchoring it to something beyond the individual task.',
+      default:       'Ask the servant leadership question: who am I here to serve right now, and what does that person or team most need from me? Shifting focus outward often dissolves inward struggle.',
+    },
+    practice: 'Identify one person in your professional world who needs something from you this week — not a deliverable, but genuine support, recognition, or clarity. Give it to them without expecting anything in return.',
+  },
+  'radical-candor': {
+    name: 'Radical Candor',
+    thinker: 'Kim Scott',
+    badge: 'Feedback Culture',
+    principle: 'The best leaders care personally about the people they work with while challenging them directly — neither ruinous empathy (kind but evasive) nor obnoxious aggression (direct but unkind).',
+    quote: '"Saying what you think in a way that demonstrates you care about the person is the essence of Radical Candor." — Kim Scott',
+    apply: {
+      resentful:  'Resentment builds when we choose ruinous empathy — avoiding hard conversations to keep the peace. Radical Candor asks: what do you need to say, with genuine care for the other person? That conversation is overdue.',
+      ignored:    'If you feel unheard, Radical Candor gives you a framework: make your feedback or ideas explicit, direct, and grounded in care for a shared outcome. Have you been too indirect? Too deferential?',
+      conflicted: 'When you\'re conflicted about whether to speak up, Radical Candor says: silence is often the less kind choice. Saying the difficult thing — with care — is how you respect someone\'s potential.',
+      default:    'Ask: is there a conversation you have been avoiding? Radical Candor says that what we avoid saying is often what most needs to be said — with genuine care, and with directness. What\'s the one thing you\'ve held back?',
+    },
+    practice: 'Identify one conversation you\'ve been avoiding. Write what you want to say in two versions: one that is caring but direct, one that avoids the issue. Commit to delivering the first version this week.',
+  },
+  ikigai: {
+    name: 'Ikigai: Purpose-Led Leadership',
+    thinker: 'Japanese Philosophy · Ken Mogi',
+    badge: 'Meaning & Purpose',
+    principle: 'Find the intersection of what you love, what you are good at, what the world needs, and what you can be rewarded for. This overlap is your ikigai — your reason for being.',
+    quote: '"The big secret is that there is no perfect day. The secret is in the small pleasures that are ikigai." — Ken Mogi',
+    apply: {
+      demotivated:    'Demotivation often signals that your ikigai threads have come apart. Which of the four are missing: love, skill, purpose, or value? Reconnecting even one of them can restore momentum.',
+      unappreciated:  'Ikigai shifts the question from "am I valued by others?" to "am I doing something that has genuine value?" When external recognition feels thin, reconnecting to your purpose makes it less essential.',
+      'burned-out':   'Burnout is often the result of being heavily rewarded for work you don\'t love or that feels meaningless. Ikigai invites you to ask: what is the smallest change that would bring more love or purpose into your daily work?',
+      default:        'Sit with this question: what part of your work are you doing that sits at the intersection of love, skill, meaning, and reward? And what part doesn\'t? That gap contains your next development conversation.',
+    },
+    practice: 'Draw the four Ikigai circles: what you love, what you\'re good at, what the world needs, what you can be paid for. Map your current role onto them. Where are the overlaps? Where are the gaps? What does that tell you?',
+  },
+  'adaptive-leadership': {
+    name: 'Adaptive Leadership',
+    thinker: 'Ronald Heifetz · Marty Linsky · Harvard',
+    badge: 'Systems Leadership',
+    principle: 'Distinguish between technical problems (solved with expertise) and adaptive challenges (requiring changes in values, beliefs, or behaviours). Leadership means holding the tension while people adapt.',
+    quote: '"Leadership is about making your organisation adapt to the challenges it faces — even when it is uncomfortable." — Ronald Heifetz',
+    apply: {
+      conflicted: 'Adaptive leadership names the thing you\'re feeling: this conflict is likely an adaptive challenge — it requires change, loss, or a shift in values, not just a technical fix. Who needs to do the adapting, and how can you help them through it?',
+      disappointed:'Your disappointment may signal that the problem was adaptive, not technical — it needed values-level change, not just a better process. What does this situation actually require people to give up or shift?',
+      frustrated:  'Heifetz asks: is this a technical problem (someone just needs to do their job differently) or an adaptive challenge (something deeper needs to change)? If adaptive, pressure alone won\'t solve it. What would help people adapt?',
+      default:     'Ask the adaptive leadership question: is this a technical problem or an adaptive challenge? Technical = apply expertise. Adaptive = help people shift their beliefs or behaviours. The answer changes your entire strategy.',
+    },
+    practice: 'Take the challenge you are facing and write two columns: "Technical aspects" (process, skill, resource) vs "Adaptive aspects" (values, beliefs, identity, behaviour change). What does the adaptive column tell you about your approach?',
+  },
+  essentialism: {
+    name: 'Essentialism',
+    thinker: 'Greg McKeown',
+    badge: 'Focus & Simplicity',
+    principle: 'The disciplined pursuit of less but better. Not everything deserves your energy — only the things that are truly essential. Protect your highest contribution ruthlessly.',
+    quote: '"If you don\'t prioritise your life, someone else will." — Greg McKeown',
+    apply: {
+      overwhelmed:  'Essentialism is the direct antidote to overwhelm. The question is not "how do I do all of this?" but "which of these actually matter enough to deserve my best?" Start eliminating, not adding.',
+      anxious:      'Anxiety expands to fill the space available. Essentialism shrinks the space: what is the single most important thing in front of you right now? Do only that until it is done.',
+      'burned-out': 'Burnout is often the result of saying yes to too many non-essential things. Essentialism asks: what is the one thing I need to say no to right now in order to protect my most important contribution?',
+      default:      'Ask the Essentialist question: if I could only do one thing today that would make the most difference, what would it be? Then protect time for that ruthlessly — and say no to anything that competes with it.',
+    },
+    practice: 'List everything on your plate right now. For each item, rate it 1-10 on "how much does this matter to what I am trying to achieve?" Eliminate or delegate anything below a 7. You will create space for what is truly essential.',
+  },
+  'psychological-safety': {
+    name: 'Psychological Safety',
+    thinker: 'Amy Edmondson · Harvard Business School',
+    badge: 'Team Dynamics',
+    principle: 'High-performing teams are built on psychological safety — the shared belief that it is safe to speak up, take risks, and be honest without fear of punishment or humiliation.',
+    quote: '"Psychological safety is not about being nice. It\'s about giving candid feedback, openly admitting mistakes, and learning from each other." — Amy Edmondson',
+    apply: {
+      'self-doubting': 'Self-doubt at work is often a signal that psychological safety is low — either genuinely in your environment, or in your own inner relationship with failure. Ask: what would I say or try if I knew I wouldn\'t be judged?',
+      ignored:         'Feeling ignored is a psychological safety signal. Either you don\'t feel safe to speak up boldly, or others don\'t have the safety to engage fully. Which is it — and what can you do about either?',
+      anxious:         'Anxiety about work performance often reflects a fear of being judged. Edmondson\'s research shows that the antidote is not perfection — it is creating conditions where learning matters more than not failing.',
+      default:         'Ask: do I feel safe to speak up, make mistakes, and be honest here? If not — is that about the environment or about my own internal fears? Both can be worked on, with different strategies.',
+    },
+    practice: 'Identify one thing you have been holding back — an idea, a concern, a mistake. Share it with one trusted person this week. Notice what happens. Psychological safety is built one brave act of honesty at a time.',
+  },
+};
+
+// ── Emotion → ordered list of philosophy keys ─────────────────────────────────
+const EMOTION_PHILOSOPHIES = {
+  frustrated:    ['extreme-ownership', 'stoicism', 'adaptive-leadership', 'radical-candor'],
+  anxious:       ['stoicism', 'essentialism', 'psychological-safety', 'growth-mindset'],
+  overwhelmed:   ['essentialism', 'servant-leadership', 'stoicism', 'adaptive-leadership'],
+  disappointed:  ['growth-mindset', 'adaptive-leadership', 'stoicism', 'emotional-intelligence'],
+  resentful:     ['radical-candor', 'emotional-intelligence', 'extreme-ownership', 'stoicism'],
+  demotivated:   ['ikigai', 'servant-leadership', 'growth-mindset', 'adaptive-leadership'],
+  conflicted:    ['adaptive-leadership', 'radical-candor', 'emotional-intelligence', 'stoicism'],
+  unappreciated: ['servant-leadership', 'ikigai', 'extreme-ownership', 'radical-candor'],
+  'self-doubting':['growth-mindset', 'psychological-safety', 'emotional-intelligence', 'stoicism'],
+  'burned-out':  ['essentialism', 'ikigai', 'servant-leadership', 'stoicism'],
+  irritated:     ['emotional-intelligence', 'stoicism', 'radical-candor', 'extreme-ownership'],
+  ignored:       ['radical-candor', 'psychological-safety', 'adaptive-leadership', 'extreme-ownership'],
+};
+
+const TIPS = {
+  amazing: [
+    { icon:'🚀', title:'Ride the wave!', text:'You\'re in flow — tackle that challenging project you\'ve been putting off. High-energy days are rare; use this momentum to do the work that stretches you.' },
+    { icon:'🤝', title:'Lift others up', text:'When you\'re thriving, your positivity is contagious. Share your energy — mentor someone, offer feedback, or celebrate a teammate\'s win.' },
+    { icon:'🧠', title:'Document your insights', text:'On your best days, your thinking is sharpest. Write down a key idea, decision, or lesson learned — your future self will thank you.' },
+  ],
+  good: [
+    { icon:'🎯', title:'Set a clear intention', text:'A good day can become a great one with a single focused goal. Pick one meaningful thing to finish by end of day and protect time for it.' },
+    { icon:'🌱', title:'Invest in growth', text:'Take 15 minutes to learn something new — an article, a short course, or a conversation with someone outside your usual circle.' },
+    { icon:'📬', title:'Clear your backlog', text:'Use this steady energy to handle tasks you\'ve been delaying. Good moods reduce friction — the to-do list shrinks fast when you\'re in this state.' },
+  ],
+  okay: [
+    { icon:'🧘', title:'A reset can help', text:'A mediocre feeling often comes from accumulated small stresses. Step away for 10 minutes — walk, breathe, stretch — and return with fresh eyes.' },
+    { icon:'✅', title:'Small wins compound', text:'Pick the smallest useful task and complete it. Momentum builds from action, not from feeling ready.' },
+    { icon:'💬', title:'Connection cures "meh"', text:'Reach out to a colleague for a quick chat. Even a 5-minute human connection can shift your energy meaningfully.' },
+  ],
+  low: [
+    { icon:'💙', title:'Be kind to yourself first', text:'Low days are part of every high performer\'s journey. Acknowledge the feeling without judgment — you don\'t have to be "on" every day.' },
+    { icon:'🔋', title:'Protect your energy', text:'On low days, guard your limited energy fiercely. Say no to optional meetings, mute non-urgent notifications, and do only what truly matters.' },
+    { icon:'🌤️', title:'One step forward', text:'Identify one small, concrete thing you can do today that will move something forward — and stop there if needed.' },
+  ],
+  stressed: [
+    { icon:'🌬️', title:'Breathe before you act', text:'When stressed, our decisions suffer. Take 5 slow breaths before responding to anything urgent. This shifts your brain from reactive to rational.' },
+    { icon:'📋', title:'Get it out of your head', text:'Write down everything stressing you — a full brain dump. Seeing worries on paper shrinks them and shows which actually need action today.' },
+    { icon:'🚧', title:'Set a boundary right now', text:'Stress often means you\'ve taken on more than is sustainable. Identify one commitment you can delay, delegate, or drop — then communicate it.' },
+  ],
+};
+
+const AREA_TIPS = {
+  'Communication':'Practice the "3-second pause" before responding in conversations — it reduces misunderstandings dramatically.',
+  'Time Management':'Time-block your calendar for your top 3 priorities before anything else gets scheduled.',
+  'Focus':'Try the Pomodoro technique: 25 minutes deep work, 5 minutes rest. Even one session can reset a scattered mind.',
+  'Collaboration':'Ask a colleague "what would make this easier for you?" — the answers often surprise and strengthen relationships.',
+  'Prioritisation':'Use the Eisenhower matrix: urgent+important first, schedule important+not-urgent, delegate the rest.',
+  'Boundaries':'Practise saying "I can\'t take that on right now, but I can help with X." Boundaries said with alternatives land better.',
+  'Creativity':'Switch your environment for 30 minutes. New surroundings are one of the fastest triggers for fresh ideas.',
+  'Confidence':'Before your next challenge, write down 3 times you\'ve succeeded at something similar. Evidence beats doubt.',
+  'Energy Management':'Identify your peak energy window and schedule your hardest work there. Save admin for low-energy periods.',
+  'Deep Work':'Block 90 minutes tomorrow morning — phone off, email closed. One uninterrupted session beats four scattered hours.',
+  'Taking Breaks':'Schedule breaks like meetings. A 10-minute walk every 90 minutes improves sustained output more than pushing through.',
+  'Mindset':'Replace "I have to" with "I get to" in your internal dialogue. A subtle shift that rebuilds motivation fast.',
+  'Problem Solving':'When stuck, explain the problem aloud to someone — or even a rubber duck. Externalising surfaces solutions.',
+  'Delegation':'Ask: "Is this the best use of my skills right now?" If not, delegate with clear context and trust.',
+  'Learning':'Spend 20 minutes today learning something adjacent to your role. The biggest breakthroughs come from unexpected intersections.',
+};
+
+// ════════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════════
+let selectedMood   = null;
+let selectedAreas  = [];
+let currentTip     = null;
+let fbType         = 'positive';
+let selectedEmotions = [];
+let philKeys       = [];   // active philosophy sequence for current journal
+let philIndex      = 0;
+
+// ════════════════════════════════════════════════════════════
+//  STORAGE HELPERS
+// ════════════════════════════════════════════════════════════
+const loadEntries  = () => JSON.parse(localStorage.getItem(STORE_KEY)    || '[]');
+const saveEntries  = v  => localStorage.setItem(STORE_KEY,    JSON.stringify(v));
+const loadFeedback = () => JSON.parse(localStorage.getItem(FB_STORE_KEY) || '[]');
+const saveFeedbackStore = v => localStorage.setItem(FB_STORE_KEY, JSON.stringify(v));
+const loadJournal  = () => JSON.parse(localStorage.getItem(JN_STORE_KEY) || '[]');
+const saveJournalStore = v => localStorage.setItem(JN_STORE_KEY, JSON.stringify(v));
+
+const todayKey  = () => new Date().toISOString().slice(0,10);
+const formatDate = iso => new Date(iso+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+const shortDate  = iso => new Date(iso+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+const escHtml = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+// ════════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('today-date').textContent   = formatDate(todayKey());
+  document.getElementById('journal-date').textContent = formatDate(todayKey());
+  document.getElementById('fb-date').value            = todayKey();
+
+  // Area chips
+  const grid = document.getElementById('area-grid');
+  AREAS.forEach(area => {
+    const c = document.createElement('div');
+    c.className = 'area-chip'; c.textContent = area;
+    c.onclick = () => toggleArea(area, c);
+    grid.appendChild(c);
+  });
+
+  // Emotion chips
+  const egrid = document.getElementById('emotion-grid');
+  EMOTIONS.forEach(em => {
+    const c = document.createElement('div');
+    c.className = 'emotion-chip';
+    c.innerHTML = `<span>${em.emoji}</span>${em.label}`;
+    c.dataset.id = em.id;
+    c.onclick = () => toggleEmotion(em.id, c);
+    egrid.appendChild(c);
+  });
+
+  const todayEntry = loadEntries().find(e => e.date === todayKey());
+  if (todayEntry) prefillToday(todayEntry);
+
+  const todayJournal = loadJournal().find(j => j.date === todayKey());
+  if (todayJournal) {
+    document.getElementById('journal-already-logged').style.display = 'flex';
+  }
+
+  renderTrendChart();
+});
+
+// ════════════════════════════════════════════════════════════
+//  TREND CHART
+// ════════════════════════════════════════════════════════════
+function renderTrendChart() {
+  const wrap    = document.getElementById('chart-wrap');
+  const tooltip = document.getElementById('chart-tooltip');
+  const entries = loadEntries().slice().sort((a,b)=>a.date.localeCompare(b.date)).slice(-14);
+
+  const svgEl = wrap.querySelector('svg');
+  if (svgEl) svgEl.remove();
+
+  if (entries.length < 2) {
+    if (!wrap.querySelector('.chart-no-data')) {
+      const d = document.createElement('div');
+      d.className = 'chart-no-data';
+      d.textContent = 'Log at least 2 days to see your trend line.';
+      wrap.appendChild(d);
+    }
+    return;
+  }
+  wrap.querySelector('.chart-no-data') && wrap.querySelector('.chart-no-data').remove();
+
+  const W=800,H=160,PL=32,PR=16,PT=12,PB=36;
+  const innerW=W-PL-PR, innerH=H-PT-PB, n=entries.length;
+  const xStep = innerW/(n-1);
+  const yScale = v => PT + innerH - ((v-1)/9)*innerH;
+  const xPos   = i => PL + i*xStep;
+
+  const moodScores   = entries.map(e=>MOOD_META[e.mood].score);
+  const energyScores = entries.map(e=>e.energy);
+  const focusScores  = entries.map(e=>e.focus);
+
+  const poly = (scores,color) =>
+    `<polyline points="${scores.map((v,i)=>`${xPos(i)},${yScale(v)}`).join(' ')}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const dots = (scores,color,series) =>
+    scores.map((v,i)=>`<circle cx="${xPos(i)}" cy="${yScale(v)}" r="4.5" fill="${color}" stroke="#0f1117" stroke-width="2" class="chart-dot" data-i="${i}" data-series="${series}" style="cursor:pointer"/>`).join('');
+
+  const moodFillPts = `${PL},${PT+innerH} ${moodScores.map((v,i)=>`${xPos(i)},${yScale(v)}`).join(' ')} ${xPos(n-1)},${PT+innerH}`;
+  const gridLines = [2,4,6,8,10].map(v=>`<line x1="${PL}" y1="${yScale(v)}" x2="${PL+innerW}" y2="${yScale(v)}" stroke="#2e3250" stroke-width="1" stroke-dasharray="4,4"/><text x="${PL-6}" y="${yScale(v)+4}" text-anchor="end" fill="#7a7f99" font-size="9">${v}</text>`).join('');
+  const xLabels = entries.map((e,i)=>{
+    if(n>7&&i%2!==0&&i!==n-1)return '';
+    return `<text x="${xPos(i)}" y="${H-6}" text-anchor="middle" fill="#7a7f99" font-size="9">${shortDate(e.date)}</text>`;
+  }).join('');
+
+  const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" id="trend-svg">
+    <defs><linearGradient id="mg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4ade80" stop-opacity=".18"/><stop offset="100%" stop-color="#4ade80" stop-opacity="0"/></linearGradient></defs>
+    ${gridLines}
+    <polygon points="${moodFillPts}" fill="url(#mg)"/>
+    ${poly(moodScores,'#4ade80')}${poly(energyScores,'#6c63ff')}${poly(focusScores,'#ff6584')}
+    ${dots(moodScores,'#4ade80','mood')}${dots(energyScores,'#6c63ff','energy')}${dots(focusScores,'#ff6584','focus')}
+    ${xLabels}
+  </svg>`;
+
+  wrap.insertAdjacentHTML('beforeend', svg);
+  wrap.querySelectorAll('.chart-dot').forEach(dot => {
+    dot.addEventListener('mouseenter', () => {
+      const i = parseInt(dot.dataset.i), e = entries[i], m = MOOD_META[e.mood];
+      document.getElementById('tt-date').textContent   = shortDate(e.date);
+      document.getElementById('tt-mood').textContent   = `Mood: ${m.label} (${m.score}/10)`;
+      document.getElementById('tt-energy').textContent = `Energy: ${e.energy}/10`;
+      document.getElementById('tt-focus').textContent  = `Focus: ${e.focus}/10`;
+      const wr = wrap.getBoundingClientRect(), dr = dot.getBoundingClientRect();
+      tooltip.style.left = (dr.left-wr.left+12)+'px';
+      tooltip.style.top  = (dr.top -wr.top -10)+'px';
+      tooltip.classList.add('show');
+    });
+    dot.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+//  LOG TODAY
+// ════════════════════════════════════════════════════════════
+function prefillToday(entry) {
+  selectMood(entry.mood);
+  document.getElementById('energy-slider').value = entry.energy;
+  document.getElementById('energy-val').textContent = entry.energy;
+  document.getElementById('focus-slider').value = entry.focus;
+  document.getElementById('focus-val').textContent = entry.focus;
+  document.getElementById('notes-input').value = entry.notes||'';
+  entry.areas.forEach(area => {
+    document.querySelectorAll('.area-chip').forEach(c=>{ if(c.textContent===area) toggleArea(area,c); });
+  });
+  document.getElementById('save-btn').textContent = 'Update Entry';
+  document.getElementById('save-btn').disabled = false;
+}
+
+function selectMood(mood) {
+  selectedMood = mood;
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
+  document.querySelector(`.mood-btn[data-mood="${mood}"]`).classList.add('selected');
+  document.getElementById('save-btn').disabled = false;
+  showTip(mood);
+}
+
+function toggleArea(area, chip) {
+  if (selectedAreas.includes(area)) {
+    selectedAreas = selectedAreas.filter(a=>a!==area);
+    chip.classList.remove('selected');
+  } else {
+    selectedAreas.push(area);
+    chip.classList.add('selected');
+  }
+  if (selectedMood) showTip(selectedMood);
+}
+
+function showTip(mood) {
+  let tip;
+  if (selectedAreas.length>0 && AREA_TIPS[selectedAreas[0]]) {
+    tip = { icon:'🎯', title:`Work on: ${selectedAreas[0]}`, text: AREA_TIPS[selectedAreas[0]] };
+  } else {
+    const pool = TIPS[mood];
+    tip = pool[Math.floor(Math.random()*pool.length)];
+  }
+  currentTip = tip;
+  document.getElementById('tip-box').style.display = 'flex';
+  document.getElementById('tip-icon').textContent  = tip.icon;
+  document.getElementById('tip-title').textContent = tip.title;
+  document.getElementById('tip-text').textContent  = tip.text;
+}
+
+function saveEntry() {
+  if (!selectedMood) return;
+  const entries = loadEntries();
+  const idx = entries.findIndex(e=>e.date===todayKey());
+  const entry = {
+    date: todayKey(), mood: selectedMood,
+    energy: parseInt(document.getElementById('energy-slider').value),
+    focus:  parseInt(document.getElementById('focus-slider').value),
+    areas: [...selectedAreas],
+    notes: document.getElementById('notes-input').value.trim(),
+    tip: currentTip ? currentTip.text : '',
+  };
+  if (idx>=0) entries[idx]=entry; else entries.unshift(entry);
+  saveEntries(entries);
+  const msg = document.getElementById('saved-msg');
+  msg.classList.add('show'); setTimeout(()=>msg.classList.remove('show'),2500);
+  document.getElementById('save-btn').textContent = 'Update Entry';
+  renderTrendChart();
+}
+
+// ════════════════════════════════════════════════════════════
+//  JOURNAL / REFLECT
+// ════════════════════════════════════════════════════════════
+function toggleEmotion(id, chip) {
+  if (selectedEmotions.includes(id)) {
+    selectedEmotions = selectedEmotions.filter(e=>e!==id);
+    chip.classList.remove('selected');
+  } else {
+    selectedEmotions.push(id);
+    chip.classList.add('selected');
+  }
+}
+
+function saveJournal() {
+  const situation  = document.getElementById('j-situation').value.trim();
+  const story      = document.getElementById('j-story').value.trim();
+  const lens       = document.getElementById('j-lens').value.trim();
+  const control    = document.getElementById('j-control').value.trim();
+  const commitment = document.getElementById('j-commitment').value.trim();
+
+  if (!situation && selectedEmotions.length === 0) {
+    alert('Please select at least one emotion or describe what happened.');
+    return;
+  }
+
+  const all = loadJournal();
+  const idx = all.findIndex(j=>j.date===todayKey());
+  const entry = {
+    date: todayKey(), emotions: [...selectedEmotions],
+    situation, story, lens, control, commitment,
+    ts: Date.now(),
+  };
+  if (idx>=0) all[idx]=entry; else all.unshift(entry);
+  saveJournalStore(all);
+
+  document.getElementById('journal-already-logged').style.display = 'flex';
+  const msg = document.getElementById('j-saved-msg');
+  msg.classList.add('show'); setTimeout(()=>msg.classList.remove('show'),2500);
+
+  renderJournalInsights(entry);
+  renderJournalList();
+}
+
+function renderJournalInsights(entry) {
+  // Perspective reframe
+  const primaryEmotion = entry.emotions[0] || null;
+  const reframe = primaryEmotion ? REFRAMES[primaryEmotion] : null;
+  if (reframe) {
+    document.getElementById('rb-title').textContent = reframe.title;
+    document.getElementById('rb-body').textContent  = reframe.body;
+  } else {
+    document.getElementById('rb-title').textContent = 'Pause and Observe';
+    document.getElementById('rb-body').textContent  = 'Every difficult moment at work carries information. Ask: what is this situation trying to teach me? What would I do differently, knowing what I know now?';
+  }
+
+  // Determine philosophy sequence
+  if (primaryEmotion && EMOTION_PHILOSOPHIES[primaryEmotion]) {
+    philKeys = EMOTION_PHILOSOPHIES[primaryEmotion];
+  } else {
+    philKeys = ['stoicism','growth-mindset','emotional-intelligence','essentialism'];
+  }
+  // also inject emotion from any secondary emotions
+  entry.emotions.slice(1).forEach(em => {
+    if (EMOTION_PHILOSOPHIES[em]) {
+      EMOTION_PHILOSOPHIES[em].forEach(k => {
+        if (!philKeys.includes(k)) philKeys.push(k);
+      });
+    }
+  });
+  philIndex = 0;
+  renderPhilosophy(primaryEmotion);
+
+  document.getElementById('journal-insights').style.display = 'block';
+  document.getElementById('journal-insights').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function renderPhilosophy(emotion) {
+  const key  = philKeys[philIndex];
+  const phil = PHILOSOPHIES[key];
+  if (!phil) return;
+
+  document.getElementById('phil-name').textContent    = phil.name;
+  document.getElementById('phil-thinker').textContent = phil.thinker;
+  document.getElementById('phil-badge').textContent   = phil.badge + ' 🧭';
+  document.getElementById('phil-principle').textContent = phil.principle;
+  document.getElementById('phil-quote').textContent   = phil.quote;
+
+  const applyText = (emotion && phil.apply[emotion]) ? phil.apply[emotion] : phil.apply.default;
+  document.getElementById('phil-apply').textContent   = applyText;
+  document.getElementById('phil-practice').textContent= phil.practice;
+  document.getElementById('phil-nav-info').textContent= `${philIndex+1} of ${philKeys.length} perspectives`;
+}
+
+function cyclePhilosophy(dir) {
+  philIndex = (philIndex + dir + philKeys.length) % philKeys.length;
+  const primaryEmotion = selectedEmotions[0] || null;
+  renderPhilosophy(primaryEmotion);
+}
+
+function renderJournalList() {
+  const all = loadJournal();
+  const el = document.getElementById('journal-list');
+  if (all.length===0) {
+    el.innerHTML = `<div class="empty"><div class="big-icon">📓</div><p>No reflections yet. Use the form above to process what's on your mind.</p></div>`;
+    return;
+  }
+  el.innerHTML = all.map(j => {
+    const tags = j.emotions.map(id=>{
+      const em = EMOTIONS.find(e=>e.id===id);
+      return em ? `<span class="je-emotion-tag">${em.emoji} ${em.label}</span>` : '';
+    }).join('');
+    return `
+      <div class="journal-entry">
+        <div class="je-header">
+          <span class="je-date">${formatDate(j.date)}</span>
+        </div>
+        ${tags ? `<div class="je-emotions">${tags}</div>` : ''}
+        ${j.situation  ? `<div class="je-section"><div class="je-section-label">What happened</div><div class="je-section-text">${escHtml(j.situation)}</div></div>` : ''}
+        ${j.story      ? `<div class="je-section"><div class="je-section-label">My inner story</div><div class="je-section-text">${escHtml(j.story)}</div></div>` : ''}
+        ${j.lens       ? `<div class="je-section"><div class="je-section-label">Another lens</div><div class="je-section-text">${escHtml(j.lens)}</div></div>` : ''}
+        ${j.control    ? `<div class="je-section"><div class="je-section-label">What I can control</div><div class="je-section-text">${escHtml(j.control)}</div></div>` : ''}
+        ${j.commitment ? `<div class="je-commitment">📌 My commitment: ${escHtml(j.commitment)}</div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+//  FEEDBACK
+// ════════════════════════════════════════════════════════════
+function setFbType(type) {
+  fbType = type;
+  document.getElementById('fb-type-pos').className = 'toggle-btn'+(type==='positive'?' active-pos':'');
+  document.getElementById('fb-type-con').className = 'toggle-btn'+(type==='constructive'?' active-con':'');
+}
+
+function saveFeedback() {
+  const text = document.getElementById('fb-text').value.trim();
+  if (!text) { alert('Please enter the feedback text.'); return; }
+  const all = loadFeedback();
+  all.unshift({
+    id: Date.now(),
+    date: document.getElementById('fb-date').value || todayKey(),
+    type: fbType,
+    from: document.getElementById('fb-from').value,
+    category: document.getElementById('fb-category').value,
+    text,
+    action: document.getElementById('fb-action').value.trim(),
+  });
+  saveFeedbackStore(all);
+  document.getElementById('fb-text').value   = '';
+  document.getElementById('fb-action').value = '';
+  document.getElementById('fb-date').value   = todayKey();
+  setFbType('positive');
+  document.getElementById('fb-from').value     = 'Manager';
+  document.getElementById('fb-category').value = 'Performance';
+  const msg = document.getElementById('fb-saved-msg');
+  msg.classList.add('show'); setTimeout(()=>msg.classList.remove('show'),2500);
+  renderFeedbackList();
+}
+
+function deleteFeedback(id) {
+  saveFeedbackStore(loadFeedback().filter(f=>f.id!==id));
+  renderFeedbackList();
+}
+
+function renderFeedbackList() {
+  const all = loadFeedback();
+  const el = document.getElementById('feedback-list');
+  if (all.length===0) {
+    el.innerHTML = `<div class="empty"><div class="big-icon">💬</div><p>No feedback logged yet.</p></div>`;
+    return;
+  }
+  el.innerHTML = all.map(f => `
+    <div class="feedback-entry">
+      <button class="btn btn-sm btn-danger fb-delete" onclick="deleteFeedback(${f.id})">Delete</button>
+      <div class="fb-header">
+        <div class="fb-meta">
+          <span class="fb-type-badge ${f.type==='positive'?'fb-type-positive':'fb-type-constructive'}">${f.type==='positive'?'👍 Positive':'🔧 Constructive'}</span>
+          <span class="fb-from">From: ${escHtml(f.from)}</span>
+          <span class="fb-category">${escHtml(f.category)}</span>
+        </div>
+        <span class="fb-date">${shortDate(f.date)}</span>
+      </div>
+      <div class="fb-text">${escHtml(f.text)}</div>
+      ${f.action?`<div class="fb-action">📌 My action: ${escHtml(f.action)}</div>`:''}
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+//  PAGE SWITCHING
+// ════════════════════════════════════════════════════════════
+function switchPage(page, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`page-${page}`).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (page==='journal')  { renderJournalList(); }
+  if (page==='feedback') { renderFeedbackList(); }
+  if (page==='history')  { renderHistory(); }
+  if (page==='stats')    { renderStats(); }
+}
+
+// ════════════════════════════════════════════════════════════
+//  HISTORY
+// ════════════════════════════════════════════════════════════
+function renderHistory() {
+  const entries = loadEntries();
+  const el = document.getElementById('history-list');
+  if (entries.length===0) {
+    el.innerHTML=`<div class="empty"><div class="big-icon">📭</div><p>No entries yet. Start by logging today's mood!</p></div>`;
+    return;
+  }
+  el.innerHTML = entries.map(e => {
+    const m = MOOD_META[e.mood];
+    const chips = e.areas.map(a=>`<span class="mini-chip">${a}</span>`).join('');
+    return `<div class="history-entry">
+      <div class="entry-header">
+        <span class="entry-date">${formatDate(e.date)}</span>
+        <span class="entry-mood" style="color:${m.color}"><span class="emoji">${m.emoji}</span> ${m.label}</span>
+      </div>
+      <div class="energy-bar-row"><span style="min-width:55px;font-size:.75rem;color:var(--muted)">⚡ Energy</span><div class="energy-bar-bg"><div class="energy-bar-fill" style="width:${e.energy*10}%;background:#6c63ff"></div></div><span style="font-size:.75rem;color:var(--muted)">${e.energy}/10</span></div>
+      <div class="energy-bar-row"><span style="min-width:55px;font-size:.75rem;color:var(--muted)">🎯 Focus</span><div class="energy-bar-bg"><div class="energy-bar-fill" style="width:${e.focus*10}%;background:#ff6584"></div></div><span style="font-size:.75rem;color:var(--muted)">${e.focus}/10</span></div>
+      ${chips?`<div class="entry-chips">${chips}</div>`:''}
+      ${e.notes?`<div class="entry-notes">"${escHtml(e.notes)}"</div>`:''}
+      ${e.tip?`<div class="entry-tip">💡 ${escHtml(e.tip)}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+//  STATS
+// ════════════════════════════════════════════════════════════
+function renderStats() {
+  const entries = loadEntries();
+  const el = document.getElementById('stats-content');
+  if (entries.length===0) {
+    el.innerHTML=`<div class="empty"><div class="big-icon">📊</div><p>Log a few days to see your insights here.</p></div>`;
+    return;
+  }
+
+  let streak=0, check=new Date(todayKey());
+  const dates=new Set(entries.map(e=>e.date));
+  while(dates.has(check.toISOString().slice(0,10))){ streak++; check.setDate(check.getDate()-1); }
+
+  const avgEnergy = (entries.reduce((s,e)=>s+e.energy,0)/entries.length).toFixed(1);
+  const avgFocus  = (entries.reduce((s,e)=>s+e.focus, 0)/entries.length).toFixed(1);
+
+  const moodCount={};
+  entries.forEach(e=>{ moodCount[e.mood]=(moodCount[e.mood]||0)+1; });
+  const areaCount={};
+  entries.forEach(e=>e.areas.forEach(a=>{ areaCount[a]=(areaCount[a]||0)+1; }));
+  const topAreas=Object.entries(areaCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+  const bestMood=Object.entries(moodCount).sort((a,b)=>b[1]-a[1])[0];
+  const bm=MOOD_META[bestMood[0]];
+
+  const fbAll=loadFeedback();
+  const jnAll=loadJournal();
+
+  // Emotion frequency from journals
+  const emotionCount={};
+  jnAll.forEach(j=>j.emotions.forEach(e=>{ emotionCount[e]=(emotionCount[e]||0)+1; }));
+  const topEmotions=Object.entries(emotionCount).sort((a,b)=>b[1]-a[1]).slice(0,4);
+
+  el.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="big" style="color:#facc15">${streak}</div><div class="lbl">Day Streak 🔥</div></div>
+      <div class="stat-card"><div class="big" style="color:#6c63ff">${entries.length}</div><div class="lbl">Entries Logged</div></div>
+      <div class="stat-card"><div class="big" style="color:#4ade80">${avgEnergy}</div><div class="lbl">Avg Energy ⚡</div></div>
+      <div class="stat-card"><div class="big" style="color:#ff6584">${avgFocus}</div><div class="lbl">Avg Focus 🎯</div></div>
+    </div>
+
+    <div class="card">
+      <h2><span>😊</span> Mood Breakdown</h2>
+      ${['amazing','good','okay','low','stressed'].map(m=>{
+        const count=moodCount[m]||0, pct=Math.round((count/entries.length)*100), meta=MOOD_META[m];
+        return `<div class="mood-bar-row"><span class="mood-bar-label">${meta.emoji} ${meta.label}</span><div class="mood-bar-bg"><div class="mood-bar-fill" style="width:${pct}%;background:${meta.color}"></div></div><span class="mood-bar-count">${count}</span></div>`;
+      }).join('')}
+    </div>
+
+    ${topAreas.length>0?`
+    <div class="card">
+      <h2><span>🔁</span> Top Improvement Areas</h2>
+      <div class="area-grid">
+        ${topAreas.map(([area,count])=>`<div class="area-chip selected" style="cursor:default">${area} <span style="opacity:.5;font-size:.7rem">${count}×</span></div>`).join('')}
+      </div>
+      ${topAreas[0]?`<div class="tip-box" style="margin-top:16px"><div class="tip-icon">🎯</div><div class="tip-body"><h3>Your #1 growth area: ${topAreas[0][0]}</h3><p>${AREA_TIPS[topAreas[0][0]]||'Keep focusing on this area.'}</p></div></div>`:''}
+    </div>`:''}
+
+    ${topEmotions.length>0?`
+    <div class="card">
+      <h2><span>🫀</span> Most Recurring Work Emotions</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+        ${topEmotions.map(([id,count])=>{
+          const em=EMOTIONS.find(e=>e.id===id);
+          return em?`<div class="emotion-chip selected" style="cursor:default">${em.emoji} ${em.label} <span style="opacity:.5;font-size:.7rem">${count}×</span></div>`:'';
+        }).join('')}
+      </div>
+      ${(()=>{
+        const topEm = topEmotions[0]?.[0];
+        const phil = topEm && EMOTION_PHILOSOPHIES[topEm] ? PHILOSOPHIES[EMOTION_PHILOSOPHIES[topEm][0]] : null;
+        return phil ? `<div class="philosophy-box" style="margin:0">
+          <div class="phil-header"><div><div class="phil-name">${phil.name}</div><div class="phil-thinker">${phil.thinker}</div></div><div class="phil-badge">${phil.badge} 🧭</div></div>
+          <hr class="phil-divider"/>
+          <div class="phil-section-label">Core Principle</div>
+          <div class="phil-principle">${phil.principle}</div>
+          <div class="phil-practice" style="margin-top:14px"><div class="label">Try This</div><p>${phil.practice}</p></div>
+        </div>` : '';
+      })()}
+    </div>`:''}
+
+    ${fbAll.length>0?`
+    <div class="card">
+      <h2><span>💬</span> Feedback Summary</h2>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <div class="stat-card" style="flex:1"><div class="big" style="color:#4ade80">${fbAll.filter(f=>f.type==='positive').length}</div><div class="lbl">Positive</div></div>
+        <div class="stat-card" style="flex:1"><div class="big" style="color:#fb923c">${fbAll.filter(f=>f.type==='constructive').length}</div><div class="lbl">Constructive</div></div>
+        <div class="stat-card" style="flex:1"><div class="big" style="color:#6c63ff">${jnAll.length}</div><div class="lbl">Reflections</div></div>
+      </div>
+    </div>`:''}
+
+    <div class="card">
+      <h2><span>✨</span> Most Common Mood</h2>
+      <p style="font-size:1.5rem;margin-bottom:8px">${bm.emoji} <strong style="color:${bm.color}">${bm.label}</strong></p>
+      <p style="color:var(--muted);font-size:0.85rem">${bestMood[1]} out of ${entries.length} days</p>
+    </div>
+  `;
+}
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+  }
+</script>
+</body>
+</html>
