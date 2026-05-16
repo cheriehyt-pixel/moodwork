@@ -3,213 +3,318 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Soul — Icon Previews</title>
+  <title>Soulfull — Icon Options</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0f1117; font-family: 'Segoe UI', system-ui, sans-serif; color: #e8eaf0; padding: 32px 24px; }
-    h1 { font-size: 1.2rem; font-weight: 700; color: #6c63ff; margin-bottom: 6px; }
+    body { background: #0f1117; font-family: 'Segoe UI', system-ui, sans-serif; color: #e8eaf0; padding: 32px 24px; min-height: 100vh; }
+    h1 { font-size: 1.2rem; font-weight: 700; color: #6c63ff; margin-bottom: 4px; }
     p  { font-size: 0.85rem; color: #7a7f99; margin-bottom: 36px; }
-
-    .grid { display: flex; flex-wrap: wrap; gap: 36px; justify-content: center; }
-
-    /* Phone home screen simulation */
+    .grid { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; }
     .icon-wrap {
       display: flex; flex-direction: column; align-items: center; gap: 10px;
       cursor: pointer; transition: transform .2s;
     }
-    .icon-wrap:hover { transform: scale(1.06); }
-    .icon-wrap svg { width: 100px; height: 100px; border-radius: 22px; display: block; box-shadow: 0 8px 32px #0008; }
-    .icon-label { font-size: 0.78rem; color: #7a7f99; text-align: center; max-width: 110px; }
-    .icon-name   { font-size: 0.88rem; color: #e8eaf0; font-weight: 500; text-align: center; }
+    .icon-wrap:hover { transform: scale(1.07); }
+    .icon-box { width: 108px; height: 108px; border-radius: 24px; overflow: hidden; display: block; box-shadow: 0 8px 32px #0009; border: 2px solid transparent; transition: border .2s; }
+    .icon-wrap.selected .icon-box { border-color: #6c63ff; box-shadow: 0 0 0 4px #6c63ff44; }
+    .icon-name { font-size: 0.88rem; color: #e8eaf0; font-weight: 600; text-align: center; }
+    .icon-label { font-size: 0.75rem; color: #7a7f99; text-align: center; }
+    .selected-tag { font-size: 0.7rem; background: #6c63ff; color: #fff; border-radius: 20px; padding: 2px 10px; }
 
-    .selected-badge {
-      font-size: 0.7rem; background: #6c63ff; color: #fff;
-      border-radius: 20px; padding: 2px 10px; margin-top: 2px;
-    }
-
-    .pick-btn {
-      margin-top: 48px; display: block; width: fit-content; margin-left: auto; margin-right: auto;
-      padding: 14px 40px; background: #6c63ff; color: #fff; border: none; border-radius: 12px;
-      font-size: 1rem; font-weight: 600; cursor: pointer; transition: background .15s;
-    }
+    .actions { margin-top: 48px; text-align: center; }
+    .pick-btn { padding: 14px 44px; background: #6c63ff; color: #fff; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background .15s; }
     .pick-btn:hover { background: #8079ff; }
-    .pick-info { text-align: center; margin-top: 16px; font-size: 0.85rem; color: #7a7f99; }
+    .pick-btn:disabled { opacity: .4; cursor: default; }
+    .pick-info { font-size: 0.85rem; color: #7a7f99; margin-top: 14px; }
   </style>
 </head>
 <body>
-  <h1>Soul — Choose Your Icon</h1>
-  <p>Click an icon to select it. Icons are shown at phone home screen size.</p>
 
-  <div class="grid">
+<h1>✨ Soulfull — Choose Your Icon</h1>
+<p>All new soul-inspired designs. Click one to select, then hit Apply.</p>
 
-    <!-- 1. Sparkle (current) -->
-    <div class="icon-wrap" onclick="pick(1, 'Sparkle')" id="wrap-1">
-      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-        <rect width="512" height="512" rx="110" fill="#1a1d27"/>
-        <rect width="512" height="512" rx="110" fill="url(#g1)" opacity=".7"/>
-        <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6c63ff"/><stop offset="100%" stop-color="#ff6584"/></linearGradient></defs>
-        <text x="256" y="310" font-size="240" text-anchor="middle" font-family="Segoe UI Emoji,Apple Color Emoji,sans-serif">✨</text>
-        <text x="256" y="430" font-size="72" text-anchor="middle" font-family="Segoe UI,sans-serif" fill="#fff" font-weight="700" letter-spacing="6">SOUL</text>
-      </svg>
-      <div class="icon-name">Soul</div>
-      <div class="icon-label">Sparkle (current)</div>
-    </div>
+<div class="grid">
 
-    <!-- 2. Bold S monogram -->
-    <div class="icon-wrap" onclick="pick(2, 'Monogram S')" id="wrap-2">
-      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-        <rect width="512" height="512" rx="110" fill="#0f1117"/>
-        <rect width="512" height="512" rx="110" fill="url(#g2)" opacity=".9"/>
-        <defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6c63ff"/><stop offset="100%" stop-color="#ff6584"/></linearGradient></defs>
-        <text x="256" y="360" font-size="380" text-anchor="middle" font-family="Georgia,serif" fill="#fff" font-weight="700">S</text>
-      </svg>
-      <div class="icon-name">Soul</div>
-      <div class="icon-label">Monogram S</div>
-    </div>
-
-    <!-- 3. Heartbeat / pulse -->
-    <div class="icon-wrap" onclick="pick(3, 'Pulse')" id="wrap-3">
-      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-        <rect width="512" height="512" rx="110" fill="#1a1d27"/>
-        <defs><linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff6584"/><stop offset="100%" stop-color="#6c63ff"/></linearGradient></defs>
-        <!-- Heartbeat line -->
-        <polyline points="40,256 140,256 175,140 210,370 245,200 280,312 315,256 472,256"
-          fill="none" stroke="url(#g3)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
-        <text x="256" y="460" font-size="72" text-anchor="middle" font-family="Segoe UI,sans-serif" fill="#e8eaf0" font-weight="700" letter-spacing="6">SOUL</text>
-      </svg>
-      <div class="icon-name">Soul</div>
-      <div class="icon-label">Heartbeat</div>
-    </div>
-
-    <!-- 4. Moon -->
-    <div class="icon-wrap" onclick="pick(4, 'Moon')" id="wrap-4">
-      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-        <rect width="512" height="512" rx="110" fill="#12101e"/>
-        <defs>
-          <radialGradient id="g4" cx="40%" cy="40%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#6c63ff"/></radialGradient>
-        </defs>
-        <!-- Stars -->
-        <circle cx="380" cy="100" r="8" fill="#facc15" opacity=".9"/>
-        <circle cx="420" cy="180" r="5" fill="#facc15" opacity=".7"/>
-        <circle cx="100" cy="140" r="6" fill="#facc15" opacity=".8"/>
-        <circle cx="440" cy="280" r="4" fill="#facc15" opacity=".6"/>
-        <circle cx="130" cy="380" r="5" fill="#facc15" opacity=".5"/>
-        <!-- Crescent moon -->
-        <circle cx="240" cy="240" r="160" fill="url(#g4)"/>
-        <circle cx="300" cy="190" r="130" fill="#12101e"/>
-        <text x="256" y="456" font-size="72" text-anchor="middle" font-family="Segoe UI,sans-serif" fill="#a78bfa" font-weight="700" letter-spacing="6">SOUL</text>
-      </svg>
-      <div class="icon-name">Soul</div>
-      <div class="icon-label">Crescent Moon</div>
-    </div>
-
-    <!-- 5. Lotus -->
-    <div class="icon-wrap" onclick="pick(5, 'Lotus')" id="wrap-5">
-      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-        <rect width="512" height="512" rx="110" fill="#1a1d27"/>
-        <defs><linearGradient id="g5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff6584"/><stop offset="100%" stop-color="#6c63ff"/></linearGradient></defs>
-        <!-- Lotus petals -->
-        <ellipse cx="256" cy="200" rx="55" ry="110" fill="url(#g5)" opacity=".95"/>
-        <ellipse cx="256" cy="200" rx="55" ry="110" fill="url(#g5)" opacity=".85" transform="rotate(40 256 280)"/>
-        <ellipse cx="256" cy="200" rx="55" ry="110" fill="url(#g5)" opacity=".85" transform="rotate(-40 256 280)"/>
-        <ellipse cx="256" cy="200" rx="55" ry="110" fill="url(#g5)" opacity=".7" transform="rotate(75 256 280)"/>
-        <ellipse cx="256" cy="200" rx="55" ry="110" fill="url(#g5)" opacity=".7" transform="rotate(-75 256 280)"/>
-        <!-- Centre -->
-        <circle cx="256" cy="280" r="38" fill="#ff6584"/>
-        <circle cx="256" cy="280" r="24" fill="#ffb3c1"/>
-        <text x="256" y="456" font-size="72" text-anchor="middle" font-family="Segoe UI,sans-serif" fill="#e8eaf0" font-weight="700" letter-spacing="6">SOUL</text>
-      </svg>
-      <div class="icon-name">Soul</div>
-      <div class="icon-label">Lotus</div>
-    </div>
-
-    <!-- 6. Mind / eye -->
-    <div class="icon-wrap" onclick="pick(6, 'Inner Eye')" id="wrap-6">
-      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-        <rect width="512" height="512" rx="110" fill="#0f1117"/>
-        <defs>
-          <linearGradient id="g6a" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6c63ff"/><stop offset="100%" stop-color="#2dd4bf"/></linearGradient>
-          <radialGradient id="g6b" cx="50%" cy="50%"><stop offset="0%" stop-color="#fff"/><stop offset="60%" stop-color="#6c63ff"/><stop offset="100%" stop-color="#1a1d27"/></radialGradient>
-        </defs>
-        <!-- Eye outline -->
-        <path d="M80,256 Q256,80 432,256 Q256,432 80,256 Z" fill="url(#g6a)" opacity=".15" stroke="url(#g6a)" stroke-width="12"/>
-        <!-- Iris -->
-        <circle cx="256" cy="256" r="90" fill="url(#g6a)"/>
-        <!-- Pupil -->
-        <circle cx="256" cy="256" r="44" fill="#0f1117"/>
-        <!-- Sparkle in eye -->
-        <circle cx="278" cy="234" r="14" fill="#fff" opacity=".9"/>
-        <circle cx="234" cy="272" r="8" fill="#fff" opacity=".5"/>
-        <text x="256" y="456" font-size="72" text-anchor="middle" font-family="Segoe UI,sans-serif" fill="#e8eaf0" font-weight="700" letter-spacing="6">SOUL</text>
-      </svg>
-      <div class="icon-name">Soul</div>
-      <div class="icon-label">Inner Eye</div>
-    </div>
-
-    <!-- 7. Wave -->
-    <div class="icon-wrap" onclick="pick(7, 'Wave')" id="wrap-7">
-      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-        <rect width="512" height="512" rx="110" fill="#0f1117"/>
-        <defs><linearGradient id="g7" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6c63ff"/><stop offset="100%" stop-color="#ff6584"/></linearGradient></defs>
-        <!-- Wave layers -->
-        <path d="M0,320 Q80,260 160,300 Q240,340 320,280 Q400,220 512,270 L512,512 L0,512 Z" fill="url(#g7)" opacity=".3"/>
-        <path d="M0,360 Q90,300 180,340 Q270,380 360,310 Q440,250 512,300 L512,512 L0,512 Z" fill="url(#g7)" opacity=".5"/>
-        <path d="M0,400 Q100,340 200,380 Q300,420 400,350 Q460,310 512,340 L512,512 L0,512 Z" fill="url(#g7)" opacity=".8"/>
-        <text x="256" y="270" font-size="120" text-anchor="middle" font-family="Segoe UI,sans-serif" fill="#fff" font-weight="700" letter-spacing="4">SOUL</text>
-        <!-- Small wave emoji -->
-        <text x="256" y="160" font-size="130" text-anchor="middle" font-family="Segoe UI Emoji,Apple Color Emoji,sans-serif">🌊</text>
-      </svg>
-      <div class="icon-name">Soul</div>
-      <div class="icon-label">Wave</div>
-    </div>
-
-    <!-- 8. Flame -->
-    <div class="icon-wrap" onclick="pick(8, 'Flame')" id="wrap-8">
-      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-        <rect width="512" height="512" rx="110" fill="#1a1117"/>
-        <defs>
-          <linearGradient id="g8" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#ff6584"/><stop offset="50%" stop-color="#fb923c"/><stop offset="100%" stop-color="#facc15"/></linearGradient>
-        </defs>
-        <!-- Flame shape -->
-        <path d="M256,420 C160,420 100,360 100,280 C100,200 160,160 200,120 C200,160 220,180 256,180 C220,140 240,80 256,60 C280,100 320,140 320,180 C340,160 350,130 340,100 C390,140 412,200 412,280 C412,360 352,420 256,420 Z" fill="url(#g8)"/>
-        <!-- Inner flame -->
-        <path d="M256,380 C210,380 180,350 180,300 C180,260 210,240 256,200 C302,240 332,260 332,300 C332,350 302,380 256,380 Z" fill="#facc15" opacity=".6"/>
-        <text x="256" y="468" font-size="68" text-anchor="middle" font-family="Segoe UI,sans-serif" fill="#e8eaf0" font-weight="700" letter-spacing="6">SOUL</text>
-      </svg>
-      <div class="icon-name">Soul</div>
-      <div class="icon-label">Flame</div>
-    </div>
-
+  <!-- 1. Inner Light -->
+  <div class="icon-wrap" onclick="pick(1,'Inner Light')" id="wrap-1">
+    <svg class="icon-box" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <rect width="512" height="512" fill="#0f1117"/>
+      <defs>
+        <radialGradient id="il-bg" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stop-color="#6c63ff" stop-opacity=".5"/>
+          <stop offset="100%" stop-color="#0f1117" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="il-orb" cx="50%" cy="46%" r="50%">
+          <stop offset="0%" stop-color="#fff"/>
+          <stop offset="30%" stop-color="#c4b5fd"/>
+          <stop offset="70%" stop-color="#6c63ff"/>
+          <stop offset="100%" stop-color="#3730a3"/>
+        </radialGradient>
+      </defs>
+      <!-- Glow background -->
+      <circle cx="256" cy="256" r="220" fill="url(#il-bg)"/>
+      <!-- Rays -->
+      <g stroke="#a78bfa" stroke-width="3" opacity=".35">
+        <line x1="256" y1="60"  x2="256" y2="10"/>
+        <line x1="256" y1="452" x2="256" y2="502"/>
+        <line x1="60"  y1="256" x2="10"  y2="256"/>
+        <line x1="452" y1="256" x2="502" y2="256"/>
+        <line x1="116" y1="116" x2="80"  y2="80"/>
+        <line x1="396" y1="116" x2="432" y2="80"/>
+        <line x1="116" y1="396" x2="80"  y2="432"/>
+        <line x1="396" y1="396" x2="432" y2="432"/>
+      </g>
+      <!-- Outer ring -->
+      <circle cx="256" cy="256" r="155" fill="none" stroke="#6c63ff" stroke-width="3" opacity=".4"/>
+      <!-- Orb -->
+      <circle cx="256" cy="256" r="105" fill="url(#il-orb)"/>
+      <!-- Highlight -->
+      <ellipse cx="222" cy="218" rx="34" ry="22" fill="#fff" opacity=".35"/>
+      <!-- Name -->
+      <text x="256" y="462" font-size="54" text-anchor="middle" font-family="Georgia,serif" fill="#e8eaf0" font-weight="700" font-style="italic">Soulfull</text>
+    </svg>
+    <div class="icon-name">Inner Light</div>
+    <div class="icon-label">Glowing orb, ethereal</div>
   </div>
 
-  <div class="pick-info" id="pick-info">Click an icon to select it</div>
-  <button class="pick-btn" onclick="confirmPick()">Use This Icon →</button>
+  <!-- 2. Sacred Flame -->
+  <div class="icon-wrap" onclick="pick(2,'Sacred Flame')" id="wrap-2">
+    <svg class="icon-box" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <rect width="512" height="512" fill="#150d0d"/>
+      <defs>
+        <linearGradient id="sf-flame" x1="0" y1="1" x2="0.3" y2="0">
+          <stop offset="0%" stop-color="#ef4444"/>
+          <stop offset="40%" stop-color="#f97316"/>
+          <stop offset="75%" stop-color="#facc15"/>
+          <stop offset="100%" stop-color="#fef9c3"/>
+        </linearGradient>
+        <radialGradient id="sf-glow" cx="50%" cy="80%">
+          <stop offset="0%" stop-color="#f97316" stop-opacity=".5"/>
+          <stop offset="100%" stop-color="#150d0d" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <ellipse cx="256" cy="420" rx="200" ry="70" fill="url(#sf-glow)"/>
+      <!-- Outer flame -->
+      <path d="M256,400 C196,400 148,358 142,300 C136,248 164,200 194,164 C194,198 208,216 226,222 C208,182 220,136 240,98 C252,126 272,148 290,164 C306,144 316,118 308,90 C352,126 374,186 368,246 C362,290 336,314 322,322 C338,308 346,286 340,264 C356,292 368,330 358,372 C350,398 306,400 256,400 Z" fill="url(#sf-flame)"/>
+      <!-- Inner flame -->
+      <path d="M256,372 C228,372 208,352 206,324 C204,302 216,280 234,262 C234,280 242,292 256,296 C246,276 250,254 260,234 C270,254 284,272 284,294 C296,280 300,260 294,240 C318,264 326,298 316,330 C308,356 282,372 256,372 Z" fill="#fff" opacity=".7"/>
+      <text x="256" y="468" font-size="52" text-anchor="middle" font-family="Georgia,serif" fill="#fde68a" font-weight="700" font-style="italic">Soulfull</text>
+    </svg>
+    <div class="icon-name">Sacred Flame</div>
+    <div class="icon-label">Spirit, passion, warmth</div>
+  </div>
 
-  <script>
-    let picked = null;
-    let pickedName = null;
+  <!-- 3. Lotus Bloom -->
+  <div class="icon-wrap" onclick="pick(3,'Lotus Bloom')" id="wrap-3">
+    <svg class="icon-box" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <rect width="512" height="512" fill="#0f111a"/>
+      <defs>
+        <linearGradient id="lt-g1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f9a8d4"/>
+          <stop offset="100%" stop-color="#6c63ff"/>
+        </linearGradient>
+        <linearGradient id="lt-g2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#fbcfe8"/>
+          <stop offset="100%" stop-color="#a78bfa"/>
+        </linearGradient>
+        <radialGradient id="lt-glow" cx="50%" cy="65%">
+          <stop offset="0%" stop-color="#c084fc" stop-opacity=".4"/>
+          <stop offset="100%" stop-color="#0f111a" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <ellipse cx="256" cy="340" rx="210" ry="100" fill="url(#lt-glow)"/>
+      <!-- Water line -->
+      <path d="M60,330 Q130,310 200,330 Q256,348 312,330 Q382,310 452,330" fill="none" stroke="#6c63ff" stroke-width="4" opacity=".5"/>
+      <!-- Back petals -->
+      <ellipse cx="256" cy="280" rx="36" ry="100" fill="url(#lt-g1)" opacity=".5" transform="rotate(-50 256 320)"/>
+      <ellipse cx="256" cy="280" rx="36" ry="100" fill="url(#lt-g1)" opacity=".5" transform="rotate(50 256 320)"/>
+      <ellipse cx="256" cy="280" rx="36" ry="100" fill="url(#lt-g1)" opacity=".5" transform="rotate(-80 256 320)"/>
+      <ellipse cx="256" cy="280" rx="36" ry="100" fill="url(#lt-g1)" opacity=".5" transform="rotate(80 256 320)"/>
+      <!-- Front petals -->
+      <ellipse cx="256" cy="270" rx="38" ry="108" fill="url(#lt-g2)" transform="rotate(-25 256 320)"/>
+      <ellipse cx="256" cy="270" rx="38" ry="108" fill="url(#lt-g2)" transform="rotate(25 256 320)"/>
+      <!-- Centre petal -->
+      <ellipse cx="256" cy="250" rx="40" ry="110" fill="url(#lt-g1)"/>
+      <!-- Centre glow -->
+      <circle cx="256" cy="316" r="30" fill="#fce7f3" opacity=".9"/>
+      <circle cx="256" cy="316" r="16" fill="#fff"/>
+      <text x="256" y="468" font-size="52" text-anchor="middle" font-family="Georgia,serif" fill="#f9a8d4" font-weight="700" font-style="italic">Soulfull</text>
+    </svg>
+    <div class="icon-name">Lotus Bloom</div>
+    <div class="icon-label">Growth, peace, awakening</div>
+  </div>
 
-    function pick(n, name) {
-      document.querySelectorAll('.icon-wrap').forEach(w => {
-        w.querySelector('.selected-badge') && w.querySelector('.selected-badge').remove();
-        w.style.outline = 'none';
-      });
-      const wrap = document.getElementById('wrap-' + n);
-      const badge = document.createElement('div');
-      badge.className = 'selected-badge';
-      badge.textContent = '✓ Selected';
-      wrap.appendChild(badge);
-      wrap.querySelector('svg').style.outline = '3px solid #6c63ff';
-      wrap.querySelector('svg').style.outlineOffset = '3px';
-      picked = n;
-      pickedName = name;
-      document.getElementById('pick-info').textContent = `"${name}" selected — click Use This Icon to apply it`;
-    }
+  <!-- 4. Aura -->
+  <div class="icon-wrap" onclick="pick(4,'Aura')" id="wrap-4">
+    <svg class="icon-box" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <rect width="512" height="512" fill="#0a0f1e"/>
+      <defs>
+        <radialGradient id="au-g" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fff"/>
+          <stop offset="20%" stop-color="#c4b5fd"/>
+          <stop offset="50%" stop-color="#6c63ff"/>
+          <stop offset="80%" stop-color="#ff6584"/>
+          <stop offset="100%" stop-color="#0a0f1e"/>
+        </radialGradient>
+      </defs>
+      <!-- Rings -->
+      <circle cx="256" cy="256" r="220" fill="none" stroke="#ff6584" stroke-width="2" opacity=".12"/>
+      <circle cx="256" cy="256" r="190" fill="none" stroke="#ff6584" stroke-width="2" opacity=".18"/>
+      <circle cx="256" cy="256" r="158" fill="none" stroke="#a78bfa" stroke-width="3" opacity=".28"/>
+      <circle cx="256" cy="256" r="124" fill="none" stroke="#a78bfa" stroke-width="3" opacity=".38"/>
+      <circle cx="256" cy="256" r="90"  fill="none" stroke="#6c63ff" stroke-width="4" opacity=".55"/>
+      <circle cx="256" cy="256" r="56"  fill="none" stroke="#c4b5fd" stroke-width="4" opacity=".7"/>
+      <!-- Core -->
+      <circle cx="256" cy="256" r="32" fill="url(#au-g)"/>
+      <text x="256" y="462" font-size="52" text-anchor="middle" font-family="Georgia,serif" fill="#c4b5fd" font-weight="700" font-style="italic">Soulfull</text>
+    </svg>
+    <div class="icon-name">Aura</div>
+    <div class="icon-label">Energy rings, consciousness</div>
+  </div>
 
-    function confirmPick() {
-      if (!picked) { alert('Please click an icon first to select it.'); return; }
-      alert(`Great choice! Tell Claude: "Use the ${pickedName} icon" and it will be applied to your Soul app.`);
-    }
-  </script>
+  <!-- 5. Dove -->
+  <div class="icon-wrap" onclick="pick(5,'Dove')" id="wrap-5">
+    <svg class="icon-box" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <rect width="512" height="512" fill="#0d1520"/>
+      <defs>
+        <linearGradient id="dv-g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#e0e7ff"/>
+          <stop offset="100%" stop-color="#a78bfa"/>
+        </linearGradient>
+        <radialGradient id="dv-glow" cx="45%" cy="45%">
+          <stop offset="0%" stop-color="#6c63ff" stop-opacity=".5"/>
+          <stop offset="100%" stop-color="#0d1520" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <circle cx="240" cy="240" r="200" fill="url(#dv-glow)"/>
+      <!-- Dove body -->
+      <path d="M130,260 C130,220 160,190 200,185 C210,170 230,155 260,152 C295,148 330,158 350,180 C370,172 395,168 410,178 C395,192 385,200 375,205 C385,218 388,235 378,250 C365,268 340,272 320,265 C305,280 285,295 260,298 C235,300 190,295 160,275 Z" fill="url(#dv-g)"/>
+      <!-- Wing -->
+      <path d="M200,185 C215,160 245,138 275,135 C260,158 250,175 248,195 C235,195 218,190 200,185 Z" fill="#c4b5fd" opacity=".8"/>
+      <!-- Tail feathers -->
+      <path d="M130,260 C110,275 90,285 75,310 C95,300 115,285 135,278 Z" fill="url(#dv-g)" opacity=".9"/>
+      <path d="M130,260 C108,268 88,268 70,280 C92,272 115,268 135,268 Z" fill="#e0e7ff" opacity=".7"/>
+      <!-- Eye -->
+      <circle cx="345" cy="188" r="10" fill="#0d1520"/>
+      <circle cx="347" cy="186" r="4" fill="#fff"/>
+      <!-- Olive branch hint -->
+      <path d="M350,210 C360,220 365,235 358,248" fill="none" stroke="#4ade80" stroke-width="5" stroke-linecap="round"/>
+      <ellipse cx="362" cy="224" rx="9" ry="6" fill="#4ade80" transform="rotate(-30 362 224)"/>
+      <ellipse cx="360" cy="238" rx="9" ry="6" fill="#4ade80" transform="rotate(20 360 238)"/>
+      <text x="256" y="460" font-size="52" text-anchor="middle" font-family="Georgia,serif" fill="#e0e7ff" font-weight="700" font-style="italic">Soulfull</text>
+    </svg>
+    <div class="icon-name">Dove</div>
+    <div class="icon-label">Freedom, peace, spirit</div>
+  </div>
+
+  <!-- 6. Flowing Soul -->
+  <div class="icon-wrap" onclick="pick(6,'Flowing Soul')" id="wrap-6">
+    <svg class="icon-box" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <rect width="512" height="512" fill="#0f1117"/>
+      <defs>
+        <linearGradient id="fs-g1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#6c63ff"/>
+          <stop offset="100%" stop-color="#ff6584"/>
+        </linearGradient>
+        <linearGradient id="fs-g2" x1="1" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ff6584"/>
+          <stop offset="100%" stop-color="#6c63ff"/>
+        </linearGradient>
+      </defs>
+      <!-- Upper flowing curve -->
+      <path d="M100,200 C120,130 200,100 256,130 C312,160 340,220 320,280 C300,340 220,360 200,320 C180,280 220,240 256,250 C292,260 310,300 290,330" fill="none" stroke="url(#fs-g1)" stroke-width="22" stroke-linecap="round"/>
+      <!-- Lower flowing curve -->
+      <path d="M290,330 C270,360 230,370 210,350 C170,310 180,240 220,210 C260,180 310,200 330,240 C350,280 330,330 290,350" fill="none" stroke="url(#fs-g2)" stroke-width="16" stroke-linecap="round" opacity=".7"/>
+      <!-- End dot -->
+      <circle cx="290" cy="350" r="18" fill="#ff6584"/>
+      <!-- Start dot -->
+      <circle cx="100" cy="200" r="14" fill="#6c63ff" opacity=".8"/>
+      <text x="256" y="462" font-size="52" text-anchor="middle" font-family="Georgia,serif" fill="#e8eaf0" font-weight="700" font-style="italic">Soulfull</text>
+    </svg>
+    <div class="icon-name">Flowing Soul</div>
+    <div class="icon-label">Journey, movement, growth</div>
+  </div>
+
+  <!-- 7. Crescent & Star -->
+  <div class="icon-wrap" onclick="pick(7,'Crescent & Star')" id="wrap-7">
+    <svg class="icon-box" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <rect width="512" height="512" fill="#080d1a"/>
+      <defs>
+        <radialGradient id="cs-moon" cx="35%" cy="38%">
+          <stop offset="0%" stop-color="#fde68a"/>
+          <stop offset="100%" stop-color="#f59e0b"/>
+        </radialGradient>
+      </defs>
+      <!-- Stars -->
+      <circle cx="400" cy="90"  r="5"  fill="#fff" opacity=".9"/>
+      <circle cx="440" cy="160" r="3"  fill="#fff" opacity=".7"/>
+      <circle cx="380" cy="200" r="4"  fill="#a78bfa" opacity=".8"/>
+      <circle cx="90"  cy="130" r="4"  fill="#fff" opacity=".6"/>
+      <circle cx="130" cy="80"  r="3"  fill="#fff" opacity=".8"/>
+      <circle cx="450" cy="240" r="3"  fill="#fff" opacity=".5"/>
+      <circle cx="70"  cy="200" r="3"  fill="#c4b5fd" opacity=".7"/>
+      <!-- Moon -->
+      <circle cx="230" cy="230" r="148" fill="url(#cs-moon)"/>
+      <circle cx="295" cy="195" r="125" fill="#080d1a"/>
+      <!-- Sparkle star -->
+      <polygon points="390,270 400,298 430,298 407,316 416,344 390,328 364,344 373,316 350,298 380,298" fill="#fde68a"/>
+      <polygon points="390,270 395,284 410,284 399,293 403,307 390,299 377,307 381,293 370,284 385,284" fill="#fff" opacity=".8"/>
+      <text x="256" y="462" font-size="52" text-anchor="middle" font-family="Georgia,serif" fill="#fde68a" font-weight="700" font-style="italic">Soulfull</text>
+    </svg>
+    <div class="icon-name">Crescent &amp; Star</div>
+    <div class="icon-label">Mystical, night, reflection</div>
+  </div>
+
+  <!-- 8. Heart Pulse -->
+  <div class="icon-wrap" onclick="pick(8,'Heart Pulse')" id="wrap-8">
+    <svg class="icon-box" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <rect width="512" height="512" fill="#120811"/>
+      <defs>
+        <linearGradient id="hp-g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#ff6584"/>
+          <stop offset="100%" stop-color="#6c63ff"/>
+        </linearGradient>
+        <radialGradient id="hp-glow" cx="50%" cy="50%">
+          <stop offset="0%" stop-color="#ff6584" stop-opacity=".4"/>
+          <stop offset="100%" stop-color="#120811" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <ellipse cx="256" cy="280" rx="200" ry="170" fill="url(#hp-glow)"/>
+      <!-- Heart shape -->
+      <path d="M256,340 C256,340 120,265 120,185 C120,148 148,120 185,120 C208,120 228,133 256,158 C284,133 304,120 327,120 C364,120 392,148 392,185 C392,265 256,340 256,340 Z" fill="url(#hp-g)"/>
+      <!-- Heartbeat line across heart -->
+      <polyline points="148,210 178,210 196,178 214,242 232,196 248,222 264,222 282,210 310,210" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity=".8"/>
+      <text x="256" y="462" font-size="52" text-anchor="middle" font-family="Georgia,serif" fill="#ff6584" font-weight="700" font-style="italic">Soulfull</text>
+    </svg>
+    <div class="icon-name">Heart Pulse</div>
+    <div class="icon-label">Alive, emotional, real</div>
+  </div>
+
+</div>
+
+<div class="actions">
+  <button class="pick-btn" id="pick-btn" onclick="confirmPick()" disabled>Select an icon first</button>
+  <div class="pick-info" id="pick-info">Click any icon above to select it</div>
+</div>
+
+<script>
+  let picked = null;
+  const names = {1:'Inner Light',2:'Sacred Flame',3:'Lotus Bloom',4:'Aura',5:'Dove',6:'Flowing Soul',7:'Crescent & Star',8:'Heart Pulse'};
+
+  function pick(n, name) {
+    document.querySelectorAll('.icon-wrap').forEach(w => w.classList.remove('selected'));
+    document.getElementById('wrap-'+n).classList.add('selected');
+    picked = n;
+    const btn = document.getElementById('pick-btn');
+    btn.disabled = false;
+    btn.textContent = `Use "${name}" →`;
+    document.getElementById('pick-info').textContent = `"${name}" selected`;
+  }
+
+  function confirmPick() {
+    if (!picked) return;
+    alert(`Tell Claude: "Use the ${names[picked]} icon" and it will be applied to your Soulfull app instantly.`);
+  }
+</script>
 </body>
 </html>

@@ -1,12 +1,36 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="110" fill="#1a1d27"/>
-  <rect width="512" height="512" rx="110" fill="url(#grad)" opacity="0.6"/>
+  <rect width="512" height="512" rx="110" fill="#0f1117"/>
   <defs>
-    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#6c63ff"/>
-      <stop offset="100%" stop-color="#ff6584"/>
-    </linearGradient>
+    <radialGradient id="il-bg" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#6c63ff" stop-opacity=".5"/>
+      <stop offset="100%" stop-color="#0f1117" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="il-orb" cx="50%" cy="46%" r="50%">
+      <stop offset="0%" stop-color="#fff"/>
+      <stop offset="30%" stop-color="#c4b5fd"/>
+      <stop offset="70%" stop-color="#6c63ff"/>
+      <stop offset="100%" stop-color="#3730a3"/>
+    </radialGradient>
   </defs>
-  <text x="256" y="330" font-size="260" text-anchor="middle" font-family="Segoe UI Emoji,Apple Color Emoji,Noto Color Emoji,sans-serif">✨</text>
-  <text x="256" y="440" font-size="58" text-anchor="middle" font-family="Georgia,serif" fill="#e8eaf0" font-weight="700" font-style="italic" letter-spacing="4">Soulfull</text>
+  <!-- Glow background -->
+  <circle cx="256" cy="256" r="220" fill="url(#il-bg)"/>
+  <!-- Rays -->
+  <g stroke="#a78bfa" stroke-width="3" opacity=".35">
+    <line x1="256" y1="60"  x2="256" y2="10"/>
+    <line x1="256" y1="452" x2="256" y2="502"/>
+    <line x1="60"  y1="256" x2="10"  y2="256"/>
+    <line x1="452" y1="256" x2="502" y2="256"/>
+    <line x1="116" y1="116" x2="80"  y2="80"/>
+    <line x1="396" y1="116" x2="432" y2="80"/>
+    <line x1="116" y1="396" x2="80"  y2="432"/>
+    <line x1="396" y1="396" x2="432" y2="432"/>
+  </g>
+  <!-- Outer ring -->
+  <circle cx="256" cy="256" r="155" fill="none" stroke="#6c63ff" stroke-width="3" opacity=".4"/>
+  <!-- Orb -->
+  <circle cx="256" cy="256" r="105" fill="url(#il-orb)"/>
+  <!-- Highlight -->
+  <ellipse cx="222" cy="218" rx="34" ry="22" fill="#fff" opacity=".35"/>
+  <!-- Name -->
+  <text x="256" y="455" font-size="54" text-anchor="middle" font-family="Georgia,serif" fill="#e8eaf0" font-weight="700" font-style="italic">Soulfull</text>
 </svg>
