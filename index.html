@@ -24,8 +24,9 @@
     .app { display: flex; min-height: 100vh; }
     .sidebar { width: 240px; min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
     .main { flex: 1; padding: 32px; max-width: 960px; overflow-x: hidden; }
-    .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); padding: 0 8px 20px; border-bottom: 1px solid var(--border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-    .logo span { font-size: 1.4rem; }
+    .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); padding: 0 8px 20px; border-bottom: 1px solid var(--border); margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+    .logo svg { width: 36px; height: 36px; flex-shrink: 0; border-radius: 8px; }
+    .logo em { font-family: Georgia, serif; font-style: italic; font-size: 1.15rem; background: linear-gradient(135deg, #c4b5fd, #ff6584); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     nav button { width: 100%; text-align: left; padding: 10px 12px; background: none; border: none; border-radius: 8px; color: var(--muted); cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; transition: all .15s; }
     nav button.active, nav button:hover { background: var(--surface2); color: var(--text); }
     nav button.active { color: var(--accent); font-weight: 600; }
@@ -250,7 +251,26 @@
 
   <!-- ── Sidebar ── -->
   <aside class="sidebar">
-    <div class="logo"><span>✨</span> <em>Soulfull</em></div>
+    <div class="logo">
+      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <rect width="512" height="512" rx="110" fill="#0f1117"/>
+        <defs>
+          <radialGradient id="sb-bg" cx="50%" cy="50%" r="60%"><stop offset="0%" stop-color="#6c63ff" stop-opacity=".5"/><stop offset="100%" stop-color="#0f1117" stop-opacity="0"/></radialGradient>
+          <radialGradient id="sb-orb" cx="50%" cy="46%" r="50%"><stop offset="0%" stop-color="#fff"/><stop offset="30%" stop-color="#c4b5fd"/><stop offset="70%" stop-color="#6c63ff"/><stop offset="100%" stop-color="#3730a3"/></radialGradient>
+        </defs>
+        <circle cx="256" cy="256" r="220" fill="url(#sb-bg)"/>
+        <g stroke="#a78bfa" stroke-width="3" opacity=".35">
+          <line x1="256" y1="60" x2="256" y2="10"/><line x1="256" y1="452" x2="256" y2="502"/>
+          <line x1="60" y1="256" x2="10" y2="256"/><line x1="452" y1="256" x2="502" y2="256"/>
+          <line x1="116" y1="116" x2="80" y2="80"/><line x1="396" y1="116" x2="432" y2="80"/>
+          <line x1="116" y1="396" x2="80" y2="432"/><line x1="396" y1="396" x2="432" y2="432"/>
+        </g>
+        <circle cx="256" cy="256" r="155" fill="none" stroke="#6c63ff" stroke-width="3" opacity=".4"/>
+        <circle cx="256" cy="256" r="105" fill="url(#sb-orb)"/>
+        <ellipse cx="222" cy="218" rx="34" ry="22" fill="#fff" opacity=".35"/>
+      </svg>
+      <em>Soulfull</em>
+    </div>
     <nav>
       <div class="nav-sep">Daily</div>
       <button class="active" data-page="log" onclick="switchPage('log',this)"><span class="icon">📝</span> Log Today</button>
