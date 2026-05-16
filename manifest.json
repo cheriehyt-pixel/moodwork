@@ -1,7 +1,7 @@
 {
-  "name": "MoodWork",
-  "short_name": "MoodWork",
-  "description": "Daily work mood tracker, reflection diary & leadership growth",
+  "name": "Soul",
+  "short_name": "Soul",
+  "description": "Daily mood tracker, reflection diary & leadership growth",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
