@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Soul — Icon Previews</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0f1117; font-family: 'Segoe UI', system-ui, sans-serif; color: #e8eaf0; padding: 32px 24px; }
+    h1 { font-size: 1.2rem; font-weight: 700; color: #6c63ff; margin-bottom: 6px; }
+    p  { font-size: 0.85rem; color: #7a7f99; margin-bottom: 36px; }
+
+    .grid { display: flex; flex-wrap: wrap; gap: 36px; justify-content: center; }
+
+    /* Phone home screen simulation */
+    .icon-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      cursor: pointer; transition: transform .2s;
+    }
+    .icon-wrap:hover { transform: scale(1.06); }
+    .icon-wrap svg { width: 100px; height: 100px; border-radius: 22px; display: block; box-shadow: 0 8px 32px #0008; }
+    .icon-label { font-size: 0.78rem; color: #7a7f99; text-align: center; max-width: 110px; }
+    .icon-name   { font-size: 0.88rem; color: #e8eaf0; font-weight: 500; text-align: center; }
+
+    .selected-badge {
+      font-size: 0.7rem; background: #6c63ff; color: #fff;
+      border-radius: 20px; padding: 2px 10px; margin-top: 2px;
+    }
+
+    .pick-btn {
+      margin-top: 48px; display: block; width: fit-content; margin-left: auto; margin-right: auto;
+      padding: 14px 40px; background: #6c63ff; color: #fff; border: none; border-radius: 12px;
+      font-size: 1rem; font-weight: 600; cursor: pointer; transition: background .15s;
+    }
+    .pick-btn:hover { background: #8079ff; }
+    .pick-info { text-align: center; margin-top: 16px; font-size: 0.85rem; color: #7a7f99; }
+  </style>
+</head>
+<body>
+  <h1>Soul — Choose Your Icon</h1>
+  <p>Click an icon to select it. Icons are shown at phone home screen size.</p>
+
+  <div class="grid">
+
+    <!-- 1. Sparkle (current) -->
+    <div class="icon-wrap" onclick="pick(1, 'Sparkle')" id="wrap-1">
+      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <rect width="512" height="512" rx="110" fill="#1a1d27"/>
+        <rect width="512" height="512" rx="110" fill="url(#g1)" opacity=".7"/>
+        <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6c63ff"/><stop offset="100%" stop-color="#ff6584"/></linearGradient></defs>
+        <text x="256" y="310" font-size="240" text-anchor="middle" font-family="Segoe UI Emoji,Apple Color Emoji,sans-serif">✨</text>
+        <text x="256" y="430" font-size="72" text-anchor="middle" font-family="Segoe UI,sans-serif" fill="#fff" font-weight="700" letter-spacing="6">SOUL</text>
+      </svg>
+      <div class="icon-name">Soul</div>
+      <div class="icon-label">Sparkle (current)</div>
+    </div>
+
+    <!-- 2. Bold S monogram -->
+    <div class="icon-wrap" onclick="pick(2, 'Monogram S')" id="wrap-2">
+      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <rect width="512" height="512" rx="110" fill="#0f1117"/>
+        <rect width="512" height="512" rx="110" fill="url(#g2)" opacity=".9"/>
+        <defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6c63ff"/><stop offset="100%" stop-color="#ff6584"/></linearGradient></defs>
+        <text x="256" y="360" font-size="380" text-anchor="middle" font-family="Georgia,serif" fill="#fff" font-weight="700">S</text>
+      </svg>
+      <div class="icon-name">Soul</div>
+      <div class="icon-label">Monogram S</div>
+    </div>
+
+    <!-- 3. Heartbeat / pulse -->
+    <div class="icon-wrap" onclick="pick(3, 'Pulse')" id="wrap-3">
+      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <rect width="512" height="512" rx="110" fill="#1a1d27"/>
+        <defs><linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff6584"/><stop offset="100%" stop-color="#6c63ff"/></linearGradient></defs>
+        <!-- Heartbeat line -->
+        <polyline points="40,256 140,256 175,140 210,370 245,200 280,312 315,256 472,256"
+          fill="none" stroke="url(#g3)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="256" y="460" font-size="72" text-anchor="middle" font-family="Segoe UI,sans-serif" fill="#e8eaf0" font-weight="700" letter-spacing="6">SOUL</text>
+      </svg>
+      <div class="icon-name">Soul</div>
+      <div class="icon-label">Heartbeat</div>
+    </div>
+
+    <!-- 4. Moon -->
+    <div class="icon-wrap" onclick="pick(4, 'Moon')" id="wrap-4">
+      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <rect width="512" height="512" rx="110" fill="#12101e"/>
+        <defs>
+          <radialGradient id="g4" cx="40%" cy="40%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#6c63ff"/></radialGradient>
+        </defs>
+        <!-- Stars -->
+        <circle cx="380" cy="100" r="8" fill="#facc15" opacity=".9"/>
+        <circle cx="420" cy="180" r="5" fill="#facc15" opacity=".7"/>
+        <circle cx="100" cy="140" r="6" fill="#facc15" opacity=".8"/>
+        <circle cx="440" cy="280" r="4" fill="#facc15" opacity=".6"/>
+        <circle cx="130" cy="380" r="5" fill="#facc15" opacity=".5"/>
+        <!-- Crescent moon -->
+        <circle cx="240" cy="240" r="160" fill="url(#g4)"/>
+        <circle cx="300" cy="190" r="130" fill="#12101e"/>
+        <text x="256" y="456" font-size="72" text-anchor="middle" font-family="Segoe UI,sans-serif" fill="#a78bfa" font-weight="700" letter-spacing="6">SOUL</text>
+      </svg>
+      <div class="icon-name">Soul</div>
+      <div class="icon-label">Crescent Moon</div>
+    </div>
+
+    <!-- 5. Lotus -->
+    <div class="icon-wrap" onclick="pick(5, 'Lotus')" id="wrap-5">
+      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <rect width="512" height="512" rx="110" fill="#1a1d27"/>
+        <defs><linearGradient id="g5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff6584"/><stop offset="100%" stop-color="#6c63ff"/></linearGradient></defs>
+        <!-- Lotus petals -->
+        <ellipse cx="256" cy="200" rx="55" ry="110" fill="url(#g5)" opacity=".95"/>
+        <ellipse cx="256" cy="200" rx="55" ry="110" fill="url(#g5)" opacity=".85" transform="rotate(40 256 280)"/>
+        <ellipse cx="256" cy="200" rx="55" ry="110" fill="url(#g5)" opacity=".85" transform="rotate(-40 256 280)"/>
+        <ellipse cx="256" cy="200" rx="55" ry="110" fill="url(#g5)" opacity=".7" transform="rotate(75 256 280)"/>
+        <ellipse cx="256" cy="200" rx="55" ry="110" fill="url(#g5)" opacity=".7" transform="rotate(-75 256 280)"/>
+        <!-- Centre -->
+        <circle cx="256" cy="280" r="38" fill="#ff6584"/>
+        <circle cx="256" cy="280" r="24" fill="#ffb3c1"/>
+        <text x="256" y="456" font-size="72" text-anchor="middle" font-family="Segoe UI,sans-serif" fill="#e8eaf0" font-weight="700" letter-spacing="6">SOUL</text>
+      </svg>
+      <div class="icon-name">Soul</div>
+      <div class="icon-label">Lotus</div>
+    </div>
+
+    <!-- 6. Mind / eye -->
+    <div class="icon-wrap" onclick="pick(6, 'Inner Eye')" id="wrap-6">
+      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <rect width="512" height="512" rx="110" fill="#0f1117"/>
+        <defs>
+          <linearGradient id="g6a" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6c63ff"/><stop offset="100%" stop-color="#2dd4bf"/></linearGradient>
+          <radialGradient id="g6b" cx="50%" cy="50%"><stop offset="0%" stop-color="#fff"/><stop offset="60%" stop-color="#6c63ff"/><stop offset="100%" stop-color="#1a1d27"/></radialGradient>
+        </defs>
+        <!-- Eye outline -->
+        <path d="M80,256 Q256,80 432,256 Q256,432 80,256 Z" fill="url(#g6a)" opacity=".15" stroke="url(#g6a)" stroke-width="12"/>
+        <!-- Iris -->
+        <circle cx="256" cy="256" r="90" fill="url(#g6a)"/>
+        <!-- Pupil -->
+        <circle cx="256" cy="256" r="44" fill="#0f1117"/>
+        <!-- Sparkle in eye -->
+        <circle cx="278" cy="234" r="14" fill="#fff" opacity=".9"/>
+        <circle cx="234" cy="272" r="8" fill="#fff" opacity=".5"/>
+        <text x="256" y="456" font-size="72" text-anchor="middle" font-family="Segoe UI,sans-serif" fill="#e8eaf0" font-weight="700" letter-spacing="6">SOUL</text>
+      </svg>
+      <div class="icon-name">Soul</div>
+      <div class="icon-label">Inner Eye</div>
+    </div>
+
+    <!-- 7. Wave -->
+    <div class="icon-wrap" onclick="pick(7, 'Wave')" id="wrap-7">
+      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <rect width="512" height="512" rx="110" fill="#0f1117"/>
+        <defs><linearGradient id="g7" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6c63ff"/><stop offset="100%" stop-color="#ff6584"/></linearGradient></defs>
+        <!-- Wave layers -->
+        <path d="M0,320 Q80,260 160,300 Q240,340 320,280 Q400,220 512,270 L512,512 L0,512 Z" fill="url(#g7)" opacity=".3"/>
+        <path d="M0,360 Q90,300 180,340 Q270,380 360,310 Q440,250 512,300 L512,512 L0,512 Z" fill="url(#g7)" opacity=".5"/>
+        <path d="M0,400 Q100,340 200,380 Q300,420 400,350 Q460,310 512,340 L512,512 L0,512 Z" fill="url(#g7)" opacity=".8"/>
+        <text x="256" y="270" font-size="120" text-anchor="middle" font-family="Segoe UI,sans-serif" fill="#fff" font-weight="700" letter-spacing="4">SOUL</text>
+        <!-- Small wave emoji -->
+        <text x="256" y="160" font-size="130" text-anchor="middle" font-family="Segoe UI Emoji,Apple Color Emoji,sans-serif">🌊</text>
+      </svg>
+      <div class="icon-name">Soul</div>
+      <div class="icon-label">Wave</div>
+    </div>
+
+    <!-- 8. Flame -->
+    <div class="icon-wrap" onclick="pick(8, 'Flame')" id="wrap-8">
+      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <rect width="512" height="512" rx="110" fill="#1a1117"/>
+        <defs>
+          <linearGradient id="g8" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#ff6584"/><stop offset="50%" stop-color="#fb923c"/><stop offset="100%" stop-color="#facc15"/></linearGradient>
+        </defs>
+        <!-- Flame shape -->
+        <path d="M256,420 C160,420 100,360 100,280 C100,200 160,160 200,120 C200,160 220,180 256,180 C220,140 240,80 256,60 C280,100 320,140 320,180 C340,160 350,130 340,100 C390,140 412,200 412,280 C412,360 352,420 256,420 Z" fill="url(#g8)"/>
+        <!-- Inner flame -->
+        <path d="M256,380 C210,380 180,350 180,300 C180,260 210,240 256,200 C302,240 332,260 332,300 C332,350 302,380 256,380 Z" fill="#facc15" opacity=".6"/>
+        <text x="256" y="468" font-size="68" text-anchor="middle" font-family="Segoe UI,sans-serif" fill="#e8eaf0" font-weight="700" letter-spacing="6">SOUL</text>
+      </svg>
+      <div class="icon-name">Soul</div>
+      <div class="icon-label">Flame</div>
+    </div>
+
+  </div>
+
+  <div class="pick-info" id="pick-info">Click an icon to select it</div>
+  <button class="pick-btn" onclick="confirmPick()">Use This Icon →</button>
+
+  <script>
+    let picked = null;
+    let pickedName = null;
+
+    function pick(n, name) {
+      document.querySelectorAll('.icon-wrap').forEach(w => {
+        w.querySelector('.selected-badge') && w.querySelector('.selected-badge').remove();
+        w.style.outline = 'none';
+      });
+      const wrap = document.getElementById('wrap-' + n);
+      const badge = document.createElement('div');
+      badge.className = 'selected-badge';
+      badge.textContent = '✓ Selected';
+      wrap.appendChild(badge);
+      wrap.querySelector('svg').style.outline = '3px solid #6c63ff';
+      wrap.querySelector('svg').style.outlineOffset = '3px';
+      picked = n;
+      pickedName = name;
+      document.getElementById('pick-info').textContent = `"${name}" selected — click Use This Icon to apply it`;
+    }
+
+    function confirmPick() {
+      if (!picked) { alert('Please click an icon first to select it.'); return; }
+      alert(`Great choice! Tell Claude: "Use the ${pickedName} icon" and it will be applied to your Soul app.`);
+    }
+  </script>
+</body>
+</html>
